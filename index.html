@@ -34,6 +34,30 @@ body{
   gap:18px;
 }
 
+.top-actions{
+  width:100%;
+  max-width:700px;
+  display:flex;
+  justify-content:flex-end;
+}
+
+.deposit-btn{
+  border:none;
+  border-radius:10px;
+  padding:10px 16px;
+  background:linear-gradient(135deg,#2ecc71,#27ae60);
+  color:#fff;
+  font-family:'Orbitron',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:1px;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(46,204,113,.18);
+  transition:transform .15s ease, filter .15s ease;
+}
+.deposit-btn:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+.deposit-btn:active{ transform:translateY(1px); }
+
 .logo{
   font-family:'Orbitron',sans-serif;
   font-size:clamp(16px,4vw,26px);
@@ -112,20 +136,28 @@ body{
 
 .progress-bar-bg{
   width:100%;
-  height:6px;
-  background:rgba(255,255,255,.07);
-  border-radius:99px;
+  height:10px;
+  background:rgba(255,255,255,.08);
+  border-radius:999px;
   overflow:hidden;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.35);
 }
 .progress-bar-fill{
   height:100%;
-  border-radius:99px;
-  background:#fff;
-  transition:width .25s linear, background .3s;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#ffffff 0%,#dfe6ee 100%);
+  box-shadow:0 0 14px rgba(255,255,255,.18);
+  transition:width .06s linear, background .3s, box-shadow .3s;
   width:100%;
 }
-.progress-bar-fill.urgent{ background:#e74c3c; }
-.progress-bar-fill.spinning{ background:rgba(255,255,255,.15); }
+.progress-bar-fill.urgent{
+  background:linear-gradient(90deg,#ff7b72 0%,#e74c3c 100%);
+  box-shadow:0 0 14px rgba(231,76,60,.28);
+}
+.progress-bar-fill.spinning{
+  background:rgba(255,255,255,.15);
+  box-shadow:none;
+}
 
 .phase-label{
   font-size:11px;
@@ -473,13 +505,17 @@ body{
   <div class="toast-amount" id="toastAmount"></div>
 </div>
 
+<div class="top-actions">
+  <button class="deposit-btn" onclick="openDeposit()">Depositar</button>
+</div>
+
 <div class="logo">Double</div>
 
 <!-- BALANCE -->
 <div class="balance-bar">
   <div>
     <div class="bal-label">Saldo</div>
-    <div class="bal-value" id="balVal">R$ 1.000,00</div>
+    <div class="bal-value" id="balVal">R$ 0,00</div>
   </div>
   <div style="text-align:right">
     <div class="bal-label">Aposta atual</div>
@@ -571,11 +607,13 @@ const MULT   = {red:2, black:2, green:14};
 const CNAMES = {red:"Vermelho", black:"Preto", green:"Branco (0)"};
 
 /* ─── STATE ─── */
-let balance    = 1000;
+let balance    = 0;
 let betColor   = null;
 let isSpinning = false;
 let countdownTimer = null;
+let countdownAnim  = null;
 let countdownSec   = 7;
+let lastCountSound = countdownSec;
 const BET_SECONDS  = 7;
 
 /* ─── DOM ─── */
@@ -745,6 +783,21 @@ function updateBalance(delta){
   else if(delta<0){ balVal.classList.add("lose"); setTimeout(()=>balVal.classList.remove("lose"),1200); }
 }
 
+function openDeposit(initial=false){
+  const suggested = initial && balance <= 0 ? "1000" : "";
+  const raw = prompt(initial ? "Escolha seu saldo inicial:" : "Digite o valor do depósito:", suggested);
+  if(raw === null) return;
+
+  const amt = parseFloat(String(raw).replace(/\s+/g,"").replace(/\./g,"").replace(",","."));
+  if(isNaN(amt) || amt <= 0){
+    showToastMsg("Valor inválido","Digite um valor maior que zero","⚠️",false);
+    return;
+  }
+
+  updateBalance(amt);
+  showToastMsg("Depósito realizado","Saldo atualizado com sucesso","💸",true,"+"+fmtMoney(amt));
+}
+
 /* ─── BET UI ─── */
 function getBetAmount(){
   const v=parseFloat(betInput.value);
@@ -808,7 +861,10 @@ function showToastMsg(title, sub, emoji, isWin, amount=""){
 /* ─── COUNTDOWN ─── */
 function startCountdown(){
   clearInterval(countdownTimer);
+  if(countdownAnim) cancelAnimationFrame(countdownAnim);
+
   countdownSec = BET_SECONDS;
+  lastCountSound = countdownSec;
   betPanel.classList.remove("locked");
   countNum.classList.remove("urgent","spinning");
   progressFill.classList.remove("urgent","spinning");
@@ -818,25 +874,44 @@ function startCountdown(){
   countNum.textContent = countdownSec;
   progressFill.style.width = "100%";
 
-  countdownTimer = setInterval(()=>{
-    countdownSec--;
-    countNum.textContent = Math.max(countdownSec, 0);
-    progressFill.style.width = ((countdownSec/BET_SECONDS)*100)+"%";
+  const startedAt = performance.now();
+  const duration = BET_SECONDS * 1000;
 
-    if(countdownSec <= 3 && countdownSec > 0){
+  function animateCountdown(now){
+    const elapsed = now - startedAt;
+    const remainingMs = Math.max(duration - elapsed, 0);
+    const progress = remainingMs / duration;
+    const nextSec = Math.max(Math.ceil(remainingMs / 1000), 0);
+
+    countdownSec = nextSec;
+    countNum.textContent = nextSec;
+    progressFill.style.width = `${progress * 100}%`;
+
+    if(nextSec <= 3 && nextSec > 0){
       countNum.classList.add("urgent");
       progressFill.classList.add("urgent");
-      try{ playCountTick(); }catch(e){}
+      if(nextSec !== lastCountSound){
+        lastCountSound = nextSec;
+        try{ playCountTick(); }catch(e){}
+      }
     }
 
-    if(countdownSec <= 0){
-      clearInterval(countdownTimer);
+    if(remainingMs > 0){
+      countdownAnim = requestAnimationFrame(animateCountdown);
+    } else {
+      countdownAnim = null;
       lockBetsAndSpin();
     }
-  }, 1000);
+  }
+
+  countdownAnim = requestAnimationFrame(animateCountdown);
 }
 
 function lockBetsAndSpin(){
+  clearInterval(countdownTimer);
+  if(countdownAnim) cancelAnimationFrame(countdownAnim);
+  countdownAnim = null;
+
   betPanel.classList.add("locked");
   countNum.classList.remove("urgent");
   countNum.classList.add("spinning");
@@ -1024,6 +1099,7 @@ function addHist(n){
   const cx=clip.getBoundingClientRect().width/2;
   track.style.transform=`translateX(${cx-CARD_W()/2}px)`;
   updateBetDisplay();
+  setTimeout(()=>{ openDeposit(true); }, 250);
   // Inicia o ciclo automático com um pequeno delay
   setTimeout(()=>{ startCountdown(); }, 800);
 })();
