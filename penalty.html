@@ -529,6 +529,7 @@ header {
 // ============================================================
 // CONFIG
 // ============================================================
+const STORAGE_KEY = 'casinoBalance';
 const MULTS = [2, 4, 8, 16, 32];
 
 /*
@@ -568,7 +569,7 @@ const KEEPER_PT  = { left:'a esquerda', center:'o centro', right:'a direita' };
 // ============================================================
 // STATE
 // ============================================================
-let balance   = 1000;
+let balance   = Number(localStorage.getItem(STORAGE_KEY) || 0);
 let round     = 0;        // 0-4 (index into MULTS)
 let inSeries  = false;
 let seriesBet = 0;
@@ -756,6 +757,7 @@ function lockZones(val) {
 // UI RENDER
 // ============================================================
 function renderBalance() {
+  localStorage.setItem(STORAGE_KEY, String(balance));
   document.getElementById('balDisp').textContent = fmt(balance);
   const cashBtn = document.getElementById('cashoutBtn');
   if (inSeries && round > 0) {
@@ -867,6 +869,11 @@ function fireConfetti(n=25) {
     setTimeout(()=>p.remove(),2400);
   }
 }
+
+window.addEventListener('storage', () => {
+  balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+  renderBalance();
+});
 </script>
 </body>
 </html>

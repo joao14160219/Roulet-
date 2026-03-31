@@ -97,6 +97,23 @@ body{
   white-space:nowrap;
 }
 
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.top-balance{
+  min-width:116px;
+  text-align:center;
+  padding:9px 12px;
+  border-radius:10px;
+  background:#162537;
+  border:1px solid var(--line);
+  font-size:16px;
+  font-weight:900;
+}
+
 .app{
   max-width:1200px;
   margin:0 auto;
@@ -288,6 +305,16 @@ body{
   min-height:240px;
 }
 
+.hand-area.player{
+  background:linear-gradient(180deg,rgba(79,140,255,.22) 0%,rgba(79,140,255,.11) 100%);
+  border-color:rgba(79,140,255,.55);
+}
+
+.hand-area.banker{
+  background:linear-gradient(180deg,rgba(255,77,79,.22) 0%,rgba(255,77,79,.11) 100%);
+  border-color:rgba(255,77,79,.55);
+}
+
 .hand-top{
   display:flex;
   justify-content:space-between;
@@ -304,10 +331,12 @@ body{
 .hand-total{
   min-width:40px;
   text-align:center;
-  padding:6px 10px;
+  padding:7px 14px;
   border-radius:999px;
   background:#142535;
   font-weight:800;
+  font-size:30px;
+  line-height:1;
 }
 
 .cards{
@@ -461,6 +490,11 @@ body{
     padding:12px;
   }
   .header-title{ font-size:18px; }
+  .top-balance{
+    min-width:96px;
+    font-size:14px;
+    padding:8px 10px;
+  }
   .live-pill{
     font-size:11px;
     padding:6px 9px;
@@ -520,7 +554,10 @@ body{
         <div class="header-sub">plinio.bet</div>
       </div>
     </div>
-    <div class="live-pill">AO VIVO</div>
+    <div class="header-right">
+      <div class="top-balance" id="topBalance">R$ 0,00</div>
+      <div class="live-pill">AO VIVO</div>
+    </div>
   </div>
 </header>
 
@@ -578,7 +615,7 @@ body{
       </div>
 
       <div class="hands">
-        <section class="hand-area">
+        <section class="hand-area player">
           <div class="hand-top">
             <div class="hand-title">Player</div>
             <div class="hand-total" id="playerTotal">0</div>
@@ -587,7 +624,7 @@ body{
           <div class="empty-text" id="playerEmpty">As cartas do Player vão aparecer aqui.</div>
         </section>
 
-        <section class="hand-area">
+        <section class="hand-area banker">
           <div class="hand-top">
             <div class="hand-title">Banker</div>
             <div class="hand-total" id="bankerTotal">0</div>
@@ -623,6 +660,7 @@ let countdownTimer = null;
 let secondsToNextRound = 15;
 
 const balanceValue = document.getElementById('balanceValue');
+const topBalance = document.getElementById('topBalance');
 const betInput = document.getElementById('betInput');
 const statusPill = document.getElementById('statusPill');
 const resultBanner = document.getElementById('resultBanner');
@@ -653,6 +691,7 @@ function saveBalance(){
 
 function updateBalance(){
   balanceValue.textContent = formatMoney(balance);
+  topBalance.textContent = formatMoney(balance);
 }
 
 function getCardValue(rank){
@@ -849,19 +888,19 @@ async function playRound(){
 
     playerHand.push(drawCard());
     renderTable(playerHand, bankerHand);
-    await sleep(700);
+    await sleep(1600);
 
     bankerHand.push(drawCard());
     renderTable(playerHand, bankerHand);
-    await sleep(700);
+    await sleep(1600);
 
     playerHand.push(drawCard());
     renderTable(playerHand, bankerHand);
-    await sleep(700);
+    await sleep(1600);
 
     bankerHand.push(drawCard());
     renderTable(playerHand, bankerHand);
-    await sleep(820);
+    await sleep(1600);
 
     let playerTotal = handTotal(playerHand);
     let bankerTotal = handTotal(bankerHand);
@@ -874,18 +913,18 @@ async function playRound(){
     if(natural){
       notes.push('Natural detectado.');
       setStatus('Natural detectado. Encerrando a rodada.', 'tie');
-await sleep(480);
+await sleep(950);
     }else{
       if(playerTotal <= 5){
         setStatus('Player compra a terceira carta...', '');
-        await sleep(420);
+        await sleep(1600);
         const third = drawCard();
         playerHand.push(third);
         playerThirdValue = third.value;
         playerDrew = true;
         renderTable(playerHand, bankerHand);
         notes.push('Player comprou terceira carta.');
-        await sleep(620);
+        await sleep(1600);
       }else{
         notes.push('Player parou.');
       }
@@ -893,11 +932,11 @@ await sleep(480);
       bankerTotal = handTotal(bankerHand);
       if(bankerShouldDraw(bankerTotal, playerThirdValue, playerDrew)){
         setStatus('Banker compra a terceira carta...', '');
-        await sleep(420);
+        await sleep(1600);
         bankerHand.push(drawCard());
         renderTable(playerHand, bankerHand);
         notes.push('Banker comprou terceira carta.');
-        await sleep(620);
+        await sleep(1600);
       }else{
         notes.push('Banker parou.');
       }

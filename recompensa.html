@@ -1,0 +1,341 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="icon.png">
+<title>Recompensas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#081425;
+  --line:rgba(255,255,255,.14);
+  --text-soft:rgba(255,255,255,.72);
+  --accent:#ff2d5f;
+  --gold:#ffd56b;
+}
+
+body{
+  min-height:100vh;
+  font-family:Arial,sans-serif;
+  color:#fff;
+  background:radial-gradient(circle at top,#12324f 0%,#081425 58%,#040b14 100%);
+  display:flex;
+  justify-content:center;
+  padding:14px 10px;
+}
+
+.app{
+  width:min(760px,100%);
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border:1px solid var(--line);
+  border-radius:0 0 16px 16px;
+  background:#0d1f32;
+  padding:11px;
+  margin-bottom:12px;
+}
+
+.back-btn{
+  width:42px;
+  height:42px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:#13283e;
+  color:#fff;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+}
+
+.balance-chip{
+  min-width:126px;
+  text-align:center;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:#13283e;
+  padding:11px;
+  font-weight:900;
+  font-size:18px;
+}
+
+.center-card{
+  min-height:calc(100vh - 120px);
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#10253b 0%,#0a1c2c 100%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  padding:22px 14px;
+  text-align:center;
+}
+
+.center-card h1{
+  font-size:36px;
+}
+
+.center-card p{
+  color:var(--text-soft);
+  max-width:430px;
+  line-height:1.45;
+}
+
+.amount-wrap{
+  width:min(380px,100%);
+}
+
+.amount-input{
+  width:100%;
+  border:none;
+  outline:none;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#081726;
+  color:#fff;
+  padding:12px 14px;
+  font-size:30px;
+  font-weight:900;
+  text-align:center;
+}
+
+.chest-wrap{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:240px;
+  height:240px;
+}
+
+.chest-img{
+  width:100%;
+  max-width:220px;
+  object-fit:contain;
+  animation:chestPulse 1.2s ease-in-out infinite;
+  filter:drop-shadow(0 10px 20px rgba(0,0,0,.45));
+}
+
+.chest-img.opening{
+  animation:chestOpen .9s ease-in-out;
+}
+
+@keyframes chestPulse{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.06); }
+}
+
+@keyframes chestOpen{
+  0%{ transform:scale(1); }
+  25%{ transform:scale(1.14); }
+  50%{ transform:scale(.96); }
+  75%{ transform:scale(1.2); }
+  100%{ transform:scale(1); }
+}
+
+.open-btn{
+  border:none;
+  border-radius:12px;
+  background:var(--accent);
+  color:#fff;
+  padding:14px 20px;
+  font-size:17px;
+  font-weight:900;
+  cursor:pointer;
+  min-width:280px;
+}
+
+.note{
+  color:var(--text-soft);
+  font-size:13px;
+}
+
+.popup{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(.9);
+  width:min(360px,90%);
+  border-radius:16px;
+  border:1px solid rgba(255,213,107,.65);
+  background:linear-gradient(180deg,#3a2a04 0%,#1f1603 100%);
+  box-shadow:0 16px 40px rgba(0,0,0,.5);
+  padding:18px;
+  text-align:center;
+  opacity:0;
+  pointer-events:none;
+  transition:all .2s ease;
+  z-index:50;
+}
+
+.popup.show{
+  opacity:1;
+  pointer-events:auto;
+  transform:translate(-50%,-50%) scale(1);
+}
+
+.popup h3{
+  color:var(--gold);
+  font-size:26px;
+  margin-bottom:8px;
+}
+
+.popup .value{
+  font-size:34px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.popup .sub{
+  color:#f9df9c;
+  margin-bottom:14px;
+}
+
+.popup button{
+  border:none;
+  border-radius:10px;
+  padding:10px 14px;
+  background:var(--gold);
+  color:#1f1603;
+  font-size:14px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+@media (max-width:640px){
+  .balance-chip{min-width:102px;font-size:15px}
+  .center-card{min-height:calc(100vh - 110px)}
+  .center-card h1{font-size:30px}
+  .amount-input{font-size:26px}
+  .open-btn{min-width:0;width:100%}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back-btn" href="hub.html" aria-label="Voltar">←</a>
+    <div class="balance-chip" id="balanceChip">R$ 0,00</div>
+  </header>
+
+  <main class="center-card">
+    <h1>Baú Misterioso</h1>
+    <p>O baú sempre arrisca todo o saldo atual. Sem escolha de valor.</p>
+
+    <div class="chest-wrap">
+      <img id="chestImg" class="chest-img" src="bau.png" alt="Baú">
+    </div>
+
+    <button id="openBtn" class="open-btn" type="button" onclick="openChest()">Trocar todo o saldo por um baú</button>
+    <div class="note" id="previewText">Você arrisca: R$ 0,00</div>
+  </main>
+</div>
+
+<div class="popup" id="resultPopup">
+  <h3>Resultado do Baú</h3>
+  <div class="value" id="popupValue">R$ 0,00</div>
+  <div class="sub" id="popupSub">Multiplicador: 1x</div>
+  <button type="button" onclick="closePopup()">Fechar</button>
+</div>
+
+<script>
+const STORAGE_KEY = 'casinoBalance';
+const balanceChip = document.getElementById('balanceChip');
+const chestImg = document.getElementById('chestImg');
+const openBtn = document.getElementById('openBtn');
+const previewText = document.getElementById('previewText');
+const popup = document.getElementById('resultPopup');
+const popupValue = document.getElementById('popupValue');
+const popupSub = document.getElementById('popupSub');
+
+let opening = false;
+
+function fmtMoney(v){
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function getBalance(){
+  return Number(localStorage.getItem(STORAGE_KEY) || 0);
+}
+
+function setBalance(v){
+  localStorage.setItem(STORAGE_KEY, String(v));
+}
+
+function renderBalance(){
+  const balance = getBalance();
+  balanceChip.textContent = fmtMoney(balance);
+  previewText.textContent = 'Você arrisca: ' + fmtMoney(balance);
+}
+
+function drawMultiplier(){
+  // Sorte melhorada, mantendo estabilidade do sistema
+  const r = Math.random() * 100;
+  if(r < 32) return 0.2;
+  if(r < 56) return 0.5;
+  if(r < 79) return 1;
+  if(r < 91) return 2;
+  if(r < 97.3) return 5;
+  if(r < 99.2) return 8;
+  if(r < 99.95) return 20;
+  return 1000;
+}
+
+function openChest(){
+  if(opening) return;
+
+  const balance = getBalance();
+  const win = balance;
+
+  if(win > balance){
+    alert('Saldo insuficiente para trocar esse valor.');
+    return;
+  }
+
+  if(balance <= 0){
+    alert('Você precisa ter saldo para abrir o baú.');
+    return;
+  }
+
+  opening = true;
+  openBtn.disabled = true;
+  chestImg.classList.remove('opening');
+  void chestImg.offsetWidth;
+  chestImg.classList.add('opening');
+
+  setTimeout(() => {
+    const mult = drawMultiplier();
+    const result = win * mult;
+    const newBalance = balance - win + result;
+
+    setBalance(newBalance);
+
+    popupValue.textContent = fmtMoney(result);
+    popupSub.textContent = 'Multiplicador: ' + mult + 'x';
+    popup.classList.add('show');
+
+    renderBalance();
+    openBtn.disabled = false;
+    opening = false;
+  }, 900);
+}
+
+function closePopup(){
+  popup.classList.remove('show');
+}
+
+window.addEventListener('storage', renderBalance);
+renderBalance();
+</script>
+</body>
+</html>
