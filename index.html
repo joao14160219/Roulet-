@@ -11,15 +11,13 @@
 :root{
   --bg:#111318;
   --surface:#1a1d24;
+  --surface2:#20232c;
   --card-size:72px;
   --gap:8px;
   --red:#c0392b;
-  --red-dark:#922b21;
   --black:#23262e;
   --black-border:#2e323c;
   --green:#1e8449;
-  --green-dark:#145a32;
-  --gold:#e8c84a;
   --text-muted:rgba(255,255,255,0.3);
 }
 
@@ -32,8 +30,8 @@ body{
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  padding:24px 16px;
-  gap:28px;
+  padding:20px 16px;
+  gap:18px;
 }
 
 .logo{
@@ -46,16 +44,106 @@ body{
   opacity:.85;
 }
 
-/* ═══════════════════════════════
-   STRIP
-═══════════════════════════════ */
-.strip-shell{
+/* ══════════════════════════════════════
+   BALANCE BAR
+══════════════════════════════════════ */
+.balance-bar{
+  width:100%; max-width:700px;
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;
+  padding:12px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.bal-label{
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--text-muted);
+  text-transform:uppercase;
+}
+.bal-value{
+  font-family:'Orbitron',sans-serif;
+  font-size:22px;
+  font-weight:900;
+  color:#fff;
+  transition:color .3s;
+}
+.bal-value.win { color:#2ecc71; }
+.bal-value.lose{ color:#e74c3c; }
+
+/* ══════════════════════════════════════
+   COUNTDOWN BAR
+══════════════════════════════════════ */
+.countdown-wrap{
+  width:100%; max-width:700px;
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;
+  padding:12px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.countdown-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.countdown-label{
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--text-muted);
+  text-transform:uppercase;
+}
+.countdown-num{
+  font-family:'Orbitron',sans-serif;
+  font-size:20px;
+  font-weight:900;
+  color:#fff;
+  min-width:28px;
+  text-align:right;
+  transition:color .3s;
+}
+.countdown-num.urgent{ color:#e74c3c; animation:pulse .5s ease infinite alternate; }
+@keyframes pulse{ to{ opacity:.5; } }
+.countdown-num.spinning{ color:rgba(255,255,255,.25); }
+
+.progress-bar-bg{
   width:100%;
-  max-width:700px;
+  height:6px;
+  background:rgba(255,255,255,.07);
+  border-radius:99px;
+  overflow:hidden;
+}
+.progress-bar-fill{
+  height:100%;
+  border-radius:99px;
+  background:#fff;
+  transition:width .25s linear, background .3s;
+  width:100%;
+}
+.progress-bar-fill.urgent{ background:#e74c3c; }
+.progress-bar-fill.spinning{ background:rgba(255,255,255,.15); }
+
+.phase-label{
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--text-muted);
+  text-align:center;
+}
+.phase-label.bet-phase{ color:#2ecc71; }
+.phase-label.spin-phase{ color:rgba(255,255,255,.3); }
+
+/* ══════════════════════════════════════
+   STRIP
+══════════════════════════════════════ */
+.strip-shell{
+  width:100%; max-width:700px;
   position:relative;
 }
-
-/* center pointer — white vertical line + triangle */
 .pointer{
   position:absolute;
   top:-6px; bottom:-6px;
@@ -84,269 +172,332 @@ body{
   border-right:8px solid transparent;
   border-bottom:12px solid #fff;
 }
+.strip-shell::before,.strip-shell::after{
+  content:''; position:absolute; top:0; bottom:0; width:100px; z-index:10; pointer-events:none;
+}
+.strip-shell::before{ left:0; background:linear-gradient(to right,var(--bg),transparent); }
+.strip-shell::after { right:0; background:linear-gradient(to left,var(--bg),transparent); }
 
-/* fade edges */
-.strip-shell::before,
-.strip-shell::after{
-  content:'';
-  position:absolute;
-  top:0; bottom:0;
-  width:100px;
-  z-index:10;
-  pointer-events:none;
-}
-.strip-shell::before{
-  left:0;
-  background:linear-gradient(to right, var(--bg) 0%, transparent 100%);
-}
-.strip-shell::after{
-  right:0;
-  background:linear-gradient(to left, var(--bg) 0%, transparent 100%);
-}
+.strip-clip{ overflow:hidden; width:100%; padding:16px 0; }
+.strip-track{ display:flex; gap:var(--gap); will-change:transform; }
 
-.strip-clip{
-  overflow:hidden;
-  width:100%;
-  padding:16px 0;
-}
-
-.strip-track{
-  display:flex;
-  gap:var(--gap);
-  will-change:transform;
-}
-
-/* ═══════════════════════════════
+/* ══════════════════════════════════════
    CARDS
-═══════════════════════════════ */
+══════════════════════════════════════ */
 .card{
   flex-shrink:0;
-  width:var(--card-size);
-  height:var(--card-size);
+  width:var(--card-size); height:var(--card-size);
   border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex; align-items:center; justify-content:center;
   font-family:'Orbitron',sans-serif;
-  font-size:18px;
-  font-weight:700;
-  position:relative;
-  user-select:none;
+  font-size:18px; font-weight:700;
+  position:relative; user-select:none;
   border:2px solid transparent;
   transition:transform .1s;
 }
-
-/* number label */
 .card-num{
-  position:absolute;
-  top:8px; left:0; right:0;
-  text-align:center;
-  font-size:16px;
-  font-weight:700;
-  letter-spacing:1px;
-  line-height:1;
+  position:absolute; top:8px; left:0; right:0;
+  text-align:center; font-size:16px; font-weight:700; letter-spacing:1px; line-height:1;
 }
-
-/* small suit icon below number */
 .card-icon{
-  position:absolute;
-  bottom:10px; left:0; right:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  opacity:.5;
+  position:absolute; bottom:10px; left:0; right:0;
+  display:flex; align-items:center; justify-content:center; opacity:.45;
 }
 .card-icon svg{ width:18px; height:18px; }
 
-.card.red{
-  background:var(--red);
-  border-color:rgba(255,255,255,0.08);
-}
-.card.black{
-  background:var(--black);
-  border-color:var(--black-border);
-}
-.card.green{
-  background:var(--green);
-  border-color:rgba(255,255,255,0.08);
-}
+.card.red  { background:var(--red);   border-color:rgba(255,255,255,.08); }
+.card.black{ background:var(--black); border-color:var(--black-border); }
+.card.green{ background:var(--green); border-color:rgba(255,255,255,.08); }
 
-/* ── WINNER card (center highlight) ── */
-.card.winner{
-  transform:scale(1.18);
-  z-index:5;
-  border-color:rgba(255,255,255,0.55) !important;
-  box-shadow:0 0 0 2px rgba(255,255,255,0.15);
-}
-
-/* winner has white background + flame icon */
+.card.winner{ transform:scale(1.18); z-index:5; border-color:rgba(255,255,255,.55)!important; }
 .card.winner-white{
-  background:#fff !important;
-  border-color:#fff !important;
+  background:#fff!important; border-color:#fff!important;
 }
 .card.winner-white .card-num{ color:#c0392b; }
-.card.winner-white .card-icon{ opacity:1; }
-.card.winner-white .card-icon svg path{ fill:#c0392b; }
+.card.winner-white .card-icon{ opacity:1; color:#c0392b; }
 
-/* ═══════════════════════════════
-   RESULT PANEL
-═══════════════════════════════ */
-.result-panel{
-  width:100%;
-  max-width:700px;
+/* ══════════════════════════════════════
+   BET PANEL
+══════════════════════════════════════ */
+.bet-panel{
+  width:100%; max-width:700px;
   background:var(--surface);
-  border:1px solid rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,.06);
   border-radius:14px;
-  padding:16px 22px;
+  padding:16px 20px;
   display:flex;
-  align-items:center;
+  flex-direction:column;
+  gap:14px;
+  transition:opacity .3s;
+}
+.bet-panel.locked{
+  opacity:.4;
+  pointer-events:none;
+}
+
+.bet-title{
+  font-size:10px; letter-spacing:3px;
+  color:var(--text-muted); text-transform:uppercase;
+}
+
+/* Amount chips */
+.bet-amounts{
+  display:flex; gap:8px; flex-wrap:wrap;
+}
+.chip{
+  padding:7px 14px;
+  border-radius:8px;
+  font-family:'Orbitron',sans-serif;
+  font-size:12px; font-weight:700;
+  background:var(--surface2);
+  border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.6);
+  cursor:pointer;
+  transition:all .15s;
+  user-select:none;
+}
+.chip:hover{ border-color:rgba(255,255,255,.3); color:#fff; }
+.chip.active{ background:#fff; color:#111; border-color:#fff; }
+
+.chip-clear{
+  padding:7px 14px;
+  border-radius:8px;
+  font-size:12px; font-weight:700;
+  background:transparent;
+  border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.35);
+  cursor:pointer;
+  transition:all .15s;
+  font-family:'Rajdhani',sans-serif;
+  letter-spacing:1px;
+}
+.chip-clear:hover{ border-color:rgba(255,255,255,.3); color:#fff; }
+
+/* Bet input row */
+.bet-input-row{
+  display:flex; align-items:center; gap:10px;
+}
+.bet-input{
+  flex:1;
+  background:var(--surface2);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;
+  padding:10px 14px;
+  font-family:'Orbitron',sans-serif;
+  font-size:16px; font-weight:700;
+  color:#fff;
+  outline:none;
+  min-width:0;
+}
+.bet-input:focus{ border-color:rgba(255,255,255,.3); }
+
+/* Colour buttons */
+.bet-colors{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+}
+
+.bet-btn{
+  position:relative;
+  padding:14px 10px;
+  border-radius:10px;
+  border:2px solid transparent;
+  font-family:'Orbitron',sans-serif;
+  font-size:13px; font-weight:700; letter-spacing:1px;
+  cursor:pointer;
+  transition:all .15s;
+  display:flex; flex-direction:column;
+  align-items:center; gap:4px;
+  user-select:none;
+}
+.bet-btn .bb-label{ font-size:11px; opacity:.8; letter-spacing:2px; }
+.bet-btn .bb-mult { font-size:10px; opacity:.55; letter-spacing:1px; }
+
+.bet-btn.bb-red{
+  background:var(--red);
+  border-color:rgba(255,255,255,.08);
+  color:#fff;
+}
+.bet-btn.bb-black{
+  background:var(--black);
+  border-color:var(--black-border);
+  color:#fff;
+}
+.bet-btn.bb-green{
+  background:var(--green);
+  border-color:rgba(255,255,255,.08);
+  color:#fff;
+}
+
+.bet-btn:hover:not(:disabled){ filter:brightness(1.15); transform:translateY(-1px); }
+.bet-btn:active:not(:disabled){ transform:translateY(1px); }
+.bet-btn:disabled{ opacity:.35; cursor:not-allowed; filter:none; transform:none; }
+
+.bet-btn.selected{
+  border-color:#fff!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
+}
+
+/* pending bet label */
+.bet-btn .pending-label{
+  position:absolute; bottom:-8px; left:50%;
+  transform:translateX(-50%);
+  background:#fff; color:#111;
+  font-size:9px; font-weight:700;
+  padding:2px 7px; border-radius:99px;
+  white-space:nowrap;
+  opacity:0; transition:opacity .2s;
+  font-family:'Rajdhani',sans-serif;
+  letter-spacing:1px;
+}
+.bet-btn.selected .pending-label{ opacity:1; }
+
+/* ══════════════════════════════════════
+   WIN/LOSE TOAST
+══════════════════════════════════════ */
+.toast{
+  position:fixed;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%) scale(.5);
+  background:var(--surface);
+  border:2px solid transparent;
+  border-radius:18px;
+  padding:28px 44px;
+  text-align:center;
+  z-index:200;
+  pointer-events:none;
+  opacity:0;
+  transition:none;
+}
+.toast.show{
+  animation:toastPop .5s cubic-bezier(.34,1.56,.64,1) forwards,
+            toastFade .4s ease 1.8s forwards;
+}
+.toast.win-toast { border-color:#2ecc71; }
+.toast.lose-toast{ border-color:#e74c3c; }
+
+.toast-emoji{ font-size:42px; line-height:1; margin-bottom:8px; }
+.toast-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:22px; font-weight:900; letter-spacing:2px;
+}
+.toast.win-toast  .toast-title{ color:#2ecc71; }
+.toast.lose-toast .toast-title{ color:#e74c3c; }
+.toast-sub{
+  font-size:14px; color:var(--text-muted);
+  margin-top:4px; letter-spacing:1px;
+}
+.toast-amount{
+  font-family:'Orbitron',sans-serif;
+  font-size:28px; font-weight:900;
+  margin-top:8px;
+}
+.toast.win-toast  .toast-amount{ color:#2ecc71; }
+.toast.lose-toast .toast-amount{ color:#e74c3c; }
+
+@keyframes toastPop{
+  0%  {opacity:0;transform:translate(-50%,-50%) scale(.5)}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+@keyframes toastFade{
+  0%  {opacity:1}
+  100%{opacity:0;transform:translate(-50%,-56%) scale(.95)}
+}
+
+/* ══════════════════════════════════════
+   RESULT PANEL
+══════════════════════════════════════ */
+.result-panel{
+  width:100%; max-width:700px;
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:14px;
+  padding:14px 20px;
+  display:flex; align-items:center;
   justify-content:space-between;
-  min-height:72px;
+  min-height:66px;
 }
-.result-left{}
-.result-label{
-  font-size:10px;
-  letter-spacing:3px;
-  color:var(--text-muted);
-  text-transform:uppercase;
-  margin-bottom:3px;
-}
+.result-label{ font-size:10px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px; }
 .result-number{
   font-family:'Orbitron',sans-serif;
-  font-size:clamp(32px,8vw,52px);
-  font-weight:900;
-  line-height:1;
+  font-size:clamp(28px,7vw,48px); font-weight:900; line-height:1;
 }
 .result-number.idle{ color:rgba(255,255,255,.1); }
 .result-number.red  { color:#e74c3c; }
 .result-number.green{ color:#2ecc71; }
 .result-number.black{ color:#fff; }
-
-@keyframes popIn{
-  0%  {transform:scale(.55);opacity:0}
-  65% {transform:scale(1.1)}
-  100%{transform:scale(1);opacity:1}
-}
+@keyframes popIn{0%{transform:scale(.55);opacity:0}65%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
 .result-number.pop{ animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both }
 
 .result-right{ display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
 .pill{
-  padding:4px 14px;
-  border-radius:99px;
-  font-size:12px;
-  font-weight:700;
-  letter-spacing:1px;
-  text-transform:uppercase;
-  opacity:0;
-  transform:translateY(6px);
-  transition:all .35s ease .1s;
+  padding:4px 14px; border-radius:99px;
+  font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  opacity:0; transform:translateY(6px); transition:all .35s ease .1s;
 }
 .pill.show{ opacity:1; transform:translateY(0); }
-.pill.red  { background:rgba(192,57,43,.25);  color:#e74c3c; border:1px solid rgba(192,57,43,.4); }
+.pill.red  { background:rgba(192,57,43,.25); color:#e74c3c; border:1px solid rgba(192,57,43,.4); }
 .pill.green{ background:rgba(30,132,73,.25);  color:#2ecc71; border:1px solid rgba(30,132,73,.4); }
 .pill.black{ background:rgba(255,255,255,.07); color:#fff;   border:1px solid rgba(255,255,255,.2); }
-.pill2{
-  font-size:10px;
-  color:var(--text-muted);
-  letter-spacing:1px;
-  text-transform:uppercase;
-  opacity:0;
-  transition:opacity .35s ease .2s;
-}
+.pill2{ font-size:10px; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; opacity:0; transition:opacity .35s ease .2s; }
 .pill2.show{ opacity:1; }
 
-/* ═══════════════════════════════
+/* ══════════════════════════════════════
    HISTORY
-═══════════════════════════════ */
+══════════════════════════════════════ */
 .section-wrap{ width:100%; max-width:700px; }
-.section-label{
-  font-family:'Orbitron',sans-serif;
-  font-size:9px;
-  letter-spacing:3px;
-  color:var(--text-muted);
-  text-transform:uppercase;
-  margin-bottom:8px;
-}
+.section-label{ font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; }
 .hist-strip{ overflow:hidden; }
 .hist-track{ display:flex; gap:7px; }
-
 .hc{
-  flex-shrink:0;
-  width:42px; height:50px;
-  border-radius:8px;
+  flex-shrink:0; width:42px; height:50px; border-radius:8px;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Orbitron',sans-serif;
-  font-size:13px; font-weight:700;
+  font-family:'Orbitron',sans-serif; font-size:13px; font-weight:700;
   border:1px solid transparent;
 }
 .hc.red  { background:var(--red);   border-color:rgba(255,255,255,.07); }
 .hc.black{ background:var(--black); border-color:var(--black-border); }
 .hc.green{ background:var(--green); border-color:rgba(255,255,255,.07); }
-
-@keyframes hcIn{
-  0%  {transform:scale(.3) translateY(12px);opacity:0}
-  65% {transform:scale(1.12) translateY(-2px);opacity:1}
-  100%{transform:scale(1) translateY(0)}
-}
+@keyframes hcIn{0%{transform:scale(.3) translateY(12px);opacity:0}65%{transform:scale(1.12) translateY(-2px);opacity:1}100%{transform:scale(1) translateY(0)}}
 .hc.new{ animation:hcIn .38s cubic-bezier(.34,1.56,.64,1) forwards; }
-
-/* ═══════════════════════════════
-   STATS
-═══════════════════════════════ */
-.stats-row{
-  width:100%; max-width:700px;
-  display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
-}
-.sb{
-  background:var(--surface);
-  border:1px solid rgba(255,255,255,.05);
-  border-radius:10px;
-  padding:10px; text-align:center;
-}
-.sv{
-  font-family:'Orbitron',sans-serif;
-  font-size:20px; font-weight:700;
-}
-.sv.r{ color:#e74c3c; }
-.sv.g{ color:#2ecc71; }
-.sv.w{ color:#fff; }
-.sl{ font-size:10px; color:var(--text-muted); letter-spacing:1.5px; text-transform:uppercase; margin-top:1px; }
-
-/* ═══════════════════════════════
-   BUTTON
-═══════════════════════════════ */
-.btn{
-  position:relative;
-  width:100%; max-width:280px;
-  padding:16px;
-  font-family:'Orbitron',sans-serif;
-  font-size:14px; font-weight:700; letter-spacing:3px;
-  text-transform:uppercase;
-  border:none; border-radius:10px;
-  cursor:pointer; overflow:hidden;
-  background:#c0392b;
-  color:#fff;
-  transition:background .15s, transform .1s;
-}
-.btn:hover:not(:disabled){ background:#a93226; transform:translateY(-1px); }
-.btn:active:not(:disabled){ transform:translateY(1px); }
-.btn:disabled{
-  background:#2e1a1a;
-  color:rgba(255,255,255,.25);
-  cursor:not-allowed;
-}
-.btn::after{
-  content:''; position:absolute; top:0; left:-100%;
-  width:60%; height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
-  transition:left .45s;
-}
-.btn:hover:not(:disabled)::after{ left:160%; }
 </style>
 </head>
 <body>
 
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-emoji" id="toastEmoji"></div>
+  <div class="toast-title" id="toastTitle"></div>
+  <div class="toast-sub" id="toastSub"></div>
+  <div class="toast-amount" id="toastAmount"></div>
+</div>
+
 <div class="logo">Double</div>
+
+<!-- BALANCE -->
+<div class="balance-bar">
+  <div>
+    <div class="bal-label">Saldo</div>
+    <div class="bal-value" id="balVal">R$ 1.000,00</div>
+  </div>
+  <div style="text-align:right">
+    <div class="bal-label">Aposta atual</div>
+    <div class="bal-value" id="betDisplay" style="font-size:16px;color:rgba(255,255,255,.5)">—</div>
+  </div>
+</div>
+
+<!-- COUNTDOWN -->
+<div class="countdown-wrap">
+  <div class="countdown-header">
+    <div class="countdown-label" id="countLabel">Tempo para apostar</div>
+    <div class="countdown-num" id="countNum">7</div>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressFill"></div>
+  </div>
+  <div class="phase-label bet-phase" id="phaseLabel">● APOSTAS ABERTAS</div>
+</div>
 
 <!-- STRIP -->
 <div class="strip-shell">
@@ -358,7 +509,7 @@ body{
 
 <!-- RESULT -->
 <div class="result-panel">
-  <div class="result-left">
+  <div>
     <div class="result-label">Último resultado</div>
     <div class="result-number idle" id="rNum">—</div>
   </div>
@@ -368,46 +519,84 @@ body{
   </div>
 </div>
 
+<!-- BET PANEL -->
+<div class="bet-panel" id="betPanel">
+  <div class="bet-title">Fazer aposta</div>
+
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="bet-amounts">
+      <div class="chip" onclick="setChip(10,this)">R$10</div>
+      <div class="chip" onclick="setChip(25,this)">R$25</div>
+      <div class="chip" onclick="setChip(50,this)">R$50</div>
+      <div class="chip" onclick="setChip(100,this)">R$100</div>
+      <div class="chip" onclick="setChip(250,this)">R$250</div>
+    </div>
+    <div class="bet-input-row" style="flex:1;min-width:120px">
+      <input class="bet-input" type="number" id="betInput" value="10" min="1" placeholder="Valor" />
+      <button class="chip-clear" onclick="clearBet()">Limpar</button>
+    </div>
+  </div>
+
+  <div class="bet-colors">
+    <button class="bet-btn bb-red" id="bbRed" onclick="selectBet('red')">
+      <span class="bb-label">VERMELHO</span>
+      <span class="bb-mult">×2</span>
+      <span class="pending-label" id="plRed"></span>
+    </button>
+    <button class="bet-btn bb-black" id="bbBlack" onclick="selectBet('black')">
+      <span class="bb-label">PRETO</span>
+      <span class="bb-mult">×2</span>
+      <span class="pending-label" id="plBlack"></span>
+    </button>
+    <button class="bet-btn bb-green" id="bbGreen" onclick="selectBet('green')">
+      <span class="bb-label">BRANCO</span>
+      <span class="bb-mult">×14</span>
+      <span class="pending-label" id="plGreen"></span>
+    </button>
+  </div>
+</div>
+
 <!-- HISTORY -->
 <div class="section-wrap">
   <div class="section-label">Histórico</div>
   <div class="hist-strip"><div class="hist-track" id="hist"></div></div>
 </div>
 
-<!-- STATS -->
-<div class="stats-row">
-  <div class="sb"><div class="sv r" id="sR">0</div><div class="sl">Vermelho</div></div>
-  <div class="sb"><div class="sv w" id="sB">0</div><div class="sl">Preto</div></div>
-  <div class="sb"><div class="sv g" id="sG">0</div><div class="sl">Zero</div></div>
-</div>
-
-<button class="btn" id="btn" onclick="spin()">&#9654;&nbsp; GIRAR</button>
-
 <script>
-/* ─────────────────────────────────────
-   DATA
-───────────────────────────────────── */
+/* ─── DATA ─── */
 const NUMS = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
 const RED  = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
 function cls(n){ return n===0?"green":RED.has(n)?"red":"black"; }
-const CNAMES = {red:"Vermelho",black:"Preto",green:"Zero"};
+const MULT   = {red:2, black:2, green:14};
+const CNAMES = {red:"Vermelho", black:"Preto", green:"Branco (0)"};
 
-const track  = document.getElementById("track");
-const clip   = document.querySelector(".strip-clip");
-const rNum   = document.getElementById("rNum");
-const rPill  = document.getElementById("rPill");
-const rPill2 = document.getElementById("rPill2");
-const hist   = document.getElementById("hist");
-const btn    = document.getElementById("btn");
-
+/* ─── STATE ─── */
+let balance    = 1000;
+let betColor   = null;
 let isSpinning = false;
-let stats = {red:0,black:0,green:0};
+let countdownTimer = null;
+let countdownSec   = 7;
+const BET_SECONDS  = 7;
 
-/* ─────────────────────────────────────
-   AUDIO — roulette tick via Web Audio
-───────────────────────────────────── */
+/* ─── DOM ─── */
+const track      = document.getElementById("track");
+const clip       = document.querySelector(".strip-clip");
+const rNum       = document.getElementById("rNum");
+const rPill      = document.getElementById("rPill");
+const rPill2     = document.getElementById("rPill2");
+const hist       = document.getElementById("hist");
+const betInput   = document.getElementById("betInput");
+const balVal     = document.getElementById("balVal");
+const betDisp    = document.getElementById("betDisplay");
+const toast      = document.getElementById("toast");
+const betPanel   = document.getElementById("betPanel");
+const countNum   = document.getElementById("countNum");
+const progressFill = document.getElementById("progressFill");
+const phaseLabel = document.getElementById("phaseLabel");
+const countLabel = document.getElementById("countLabel");
+
+/* ─── AUDIO ─── */
 let audioCtx = null;
-
 function ensureAudio(){
   if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
 }
@@ -415,226 +604,428 @@ function ensureAudio(){
 function playTick(pitch=1, vol=0.18){
   try{
     ensureAudio();
-    // short percussive click: noise burst shaped by quick envelope
-    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*0.04, audioCtx.sampleRate);
-    const data = buf.getChannelData(0);
-    for(let i=0;i<data.length;i++){
-      // white noise * decaying envelope
-      data[i] = (Math.random()*2-1) * Math.exp(-i/(data.length*0.15));
-    }
-    const src = audioCtx.createBufferSource();
-    src.buffer = buf;
-    src.playbackRate.value = pitch;
-
-    // band-pass to make it sound more mechanical
-    const bp = audioCtx.createBiquadFilter();
-    bp.type = "bandpass";
-    bp.frequency.value = 1800 * pitch;
-    bp.Q.value = 0.8;
-
-    const gain = audioCtx.createGain();
-    gain.gain.value = vol;
-
-    src.connect(bp);
-    bp.connect(gain);
-    gain.connect(audioCtx.destination);
-    src.start();
-  } catch(e){}
+    const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.04,audioCtx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.15));
+    const src=audioCtx.createBufferSource(); src.buffer=buf; src.playbackRate.value=pitch;
+    const bp=audioCtx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=1800*pitch; bp.Q.value=0.8;
+    const g=audioCtx.createGain(); g.gain.value=vol;
+    src.connect(bp); bp.connect(g); g.connect(audioCtx.destination); src.start();
+  }catch(e){}
 }
 
 function playLand(){
   try{
     ensureAudio();
-    // heavier thud on landing
-    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*0.12, audioCtx.sampleRate);
-    const data = buf.getChannelData(0);
-    for(let i=0;i<data.length;i++){
-      data[i] = (Math.random()*2-1) * Math.exp(-i/(data.length*0.08));
-    }
-    const src = audioCtx.createBufferSource();
-    src.buffer = buf;
-
-    const lp = audioCtx.createBiquadFilter();
-    lp.type = "lowpass";
-    lp.frequency.value = 600;
-
-    const gain = audioCtx.createGain();
-    gain.gain.value = 0.55;
-
-    src.connect(lp); lp.connect(gain); gain.connect(audioCtx.destination);
-    src.start();
-  } catch(e){}
+    const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.12,audioCtx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.08));
+    const src=audioCtx.createBufferSource(); src.buffer=buf;
+    const lp=audioCtx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=600;
+    const g=audioCtx.createGain(); g.gain.value=0.55;
+    src.connect(lp); lp.connect(g); g.connect(audioCtx.destination); src.start();
+  }catch(e){}
 }
 
-/* ─────────────────────────────────────
-   CARD METRICS
-───────────────────────────────────── */
+function playWin(){
+  try{
+    ensureAudio();
+    const notes=[523,659,784,1047];
+    notes.forEach((freq,i)=>{
+      setTimeout(()=>{
+        const osc=audioCtx.createOscillator();
+        const g=audioCtx.createGain();
+        osc.type="sine"; osc.frequency.value=freq;
+        g.gain.setValueAtTime(0,audioCtx.currentTime);
+        g.gain.linearRampToValueAtTime(0.22,audioCtx.currentTime+0.02);
+        g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.28);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime+0.3);
+      }, i*90);
+    });
+    setTimeout(()=>{
+      const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.18,audioCtx.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.25));
+      const src=audioCtx.createBufferSource(); src.buffer=buf;
+      const hp=audioCtx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=4000;
+      const g=audioCtx.createGain(); g.gain.value=0.12;
+      src.connect(hp); hp.connect(g); g.connect(audioCtx.destination); src.start();
+    },360);
+  }catch(e){}
+}
+
+function playLose(){
+  try{
+    ensureAudio();
+    const notes=[330,262];
+    notes.forEach((freq,i)=>{
+      setTimeout(()=>{
+        const osc=audioCtx.createOscillator();
+        const g=audioCtx.createGain();
+        osc.type="sawtooth"; osc.frequency.value=freq;
+        g.gain.setValueAtTime(0,audioCtx.currentTime);
+        g.gain.linearRampToValueAtTime(0.15,audioCtx.currentTime+0.03);
+        g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.35);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime+0.38);
+      },i*180);
+    });
+  }catch(e){}
+}
+
+function playJackpot(){
+  try{
+    ensureAudio();
+    const melody=[523,659,784,880,1047,880,1047];
+    melody.forEach((freq,i)=>{
+      setTimeout(()=>{
+        const osc=audioCtx.createOscillator();
+        const g=audioCtx.createGain();
+        osc.type="triangle"; osc.frequency.value=freq;
+        g.gain.setValueAtTime(0,audioCtx.currentTime);
+        g.gain.linearRampToValueAtTime(0.3,audioCtx.currentTime+0.02);
+        g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.22);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime+0.25);
+      },i*100);
+    });
+    [0,100,200,300,400].forEach(delay=>{
+      setTimeout(()=>{
+        const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.08,audioCtx.sampleRate);
+        const d=buf.getChannelData(0);
+        for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.2));
+        const src=audioCtx.createBufferSource(); src.buffer=buf;
+        const hp=audioCtx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=5000;
+        const g=audioCtx.createGain(); g.gain.value=0.1;
+        src.connect(hp); hp.connect(g); g.connect(audioCtx.destination); src.start();
+      },delay);
+    });
+  }catch(e){}
+}
+
+function playCountTick(){
+  try{
+    ensureAudio();
+    const osc=audioCtx.createOscillator();
+    const g=audioCtx.createGain();
+    osc.type="sine"; osc.frequency.value=880;
+    g.gain.setValueAtTime(0,audioCtx.currentTime);
+    g.gain.linearRampToValueAtTime(0.08,audioCtx.currentTime+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.12);
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime+0.13);
+  }catch(e){}
+}
+
+/* ─── CARD METRICS ─── */
 function CARD_W(){ return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-size'))||72; }
 function GAP()   { return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'))||8; }
 function STRIDE(){ return CARD_W()+GAP(); }
 
-/* SVG icons */
-const FLAME_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M12 2C12 2 7 8 7 13a5 5 0 0010 0c0-3-2-6-2-6s-1 2-2 2c-1 0-1-7 1-7z" fill="currentColor"/>
-  <path d="M12 16a2 2 0 000 4 2 2 0 000-4z" fill="currentColor" opacity=".4"/>
-</svg>`;
+const FLAME_SVG   = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 7 8 7 13a5 5 0 0010 0c0-3-2-6-2-6s-1 2-2 2c-1 0-1-7 1-7z" fill="currentColor"/><path d="M12 16a2 2 0 000 4 2 2 0 000-4z" fill="currentColor" opacity=".4"/></svg>`;
+const DIAMOND_SVG = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 3L20 12L12 21L4 12Z" fill="currentColor"/></svg>`;
 
-const DIAMOND_SVG = `<svg viewBox="0 0 24 24" fill="none">
-  <path d="M12 3L20 12L12 21L4 12Z" fill="currentColor"/>
-</svg>`;
-
-function makeCard(n, isWinnerCenter=false){
-  const c = cls(n);
-  const div = document.createElement("div");
-
-  if(isWinnerCenter){
-    div.className = "card winner winner-white";
-    div.innerHTML = `
-      <div class="card-num" style="color:#c0392b">${n}</div>
-      <div class="card-icon" style="color:#c0392b;opacity:1">${FLAME_SVG}</div>`;
-  } else {
-    div.className = `card ${c}`;
-    div.innerHTML = `
-      <div class="card-num">${n}</div>
-      <div class="card-icon" style="color:#fff">${DIAMOND_SVG}</div>`;
-  }
+function makeCard(n){
+  const c=cls(n);
+  const div=document.createElement("div");
+  div.className=`card ${c}`;
+  div.innerHTML=`<div class="card-num">${n}</div><div class="card-icon" style="color:#fff">${DIAMOND_SVG}</div>`;
   return div;
 }
 
-/* ─────────────────────────────────────
-   SPIN
-───────────────────────────────────── */
-const REPEATS = 7;  // full sequences in strip
+/* ─── BALANCE ─── */
+function fmtMoney(v){ return "R$ "+v.toLocaleString("pt-BR",{minimumFractionDigits:2}); }
+
+function updateBalance(delta){
+  balance += delta;
+  balVal.textContent = fmtMoney(balance);
+  balVal.classList.remove("win","lose");
+  if(delta>0){ balVal.classList.add("win"); setTimeout(()=>balVal.classList.remove("win"),1200); }
+  else if(delta<0){ balVal.classList.add("lose"); setTimeout(()=>balVal.classList.remove("lose"),1200); }
+}
+
+/* ─── BET UI ─── */
+function getBetAmount(){
+  const v=parseFloat(betInput.value);
+  return (!isNaN(v)&&v>0)?v:0;
+}
+
+function setChip(val, el){
+  betInput.value = val;
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+  if(el) el.classList.add("active");
+  updateBetDisplay();
+}
+
+function clearBet(){
+  betColor=null;
+  document.querySelectorAll(".bet-btn").forEach(b=>b.classList.remove("selected"));
+  updateBetDisplay();
+}
+
+function selectBet(color){
+  ensureAudio();
+  if(isSpinning) return;
+  const amt=getBetAmount();
+  if(amt<=0){ betInput.focus(); return; }
+  if(amt>balance){ showToastMsg("Saldo insuficiente","","❌",false); return; }
+  betColor = (betColor===color) ? null : color;
+  document.querySelectorAll(".bet-btn").forEach(b=>b.classList.remove("selected"));
+  if(betColor){
+    document.getElementById("bb"+cap(betColor)).classList.add("selected");
+    document.getElementById("pl"+cap(betColor)).textContent = fmtMoney(amt);
+  }
+  updateBetDisplay();
+}
+
+function cap(s){ return s[0].toUpperCase()+s.slice(1); }
+
+function updateBetDisplay(){
+  const amt=getBetAmount();
+  if(betColor&&amt>0){
+    betDisp.textContent = `${fmtMoney(amt)} em ${CNAMES[betColor]}`;
+    betDisp.style.color = "#fff";
+  } else {
+    betDisp.textContent = "—";
+    betDisp.style.color = "rgba(255,255,255,.4)";
+  }
+}
+
+betInput.addEventListener("input",()=>{ updateBetDisplay(); });
+
+/* ─── TOAST ─── */
+function showToastMsg(title, sub, emoji, isWin, amount=""){
+  toast.className = "toast "+(isWin?"win-toast":"lose-toast");
+  document.getElementById("toastEmoji").textContent  = emoji;
+  document.getElementById("toastTitle").textContent  = title;
+  document.getElementById("toastSub").textContent    = sub;
+  document.getElementById("toastAmount").textContent = amount;
+  toast.classList.add("show");
+  setTimeout(()=>{ toast.className="toast"; },2400);
+}
+
+/* ─── COUNTDOWN ─── */
+function startCountdown(){
+  clearInterval(countdownTimer);
+  countdownSec = BET_SECONDS;
+  betPanel.classList.remove("locked");
+  countNum.classList.remove("urgent","spinning");
+  progressFill.classList.remove("urgent","spinning");
+  phaseLabel.className = "phase-label bet-phase";
+  phaseLabel.textContent = "● APOSTAS ABERTAS";
+  countLabel.textContent = "Tempo para apostar";
+  countNum.textContent = countdownSec;
+  progressFill.style.width = "100%";
+
+  countdownTimer = setInterval(()=>{
+    countdownSec--;
+    countNum.textContent = Math.max(countdownSec, 0);
+    progressFill.style.width = ((countdownSec/BET_SECONDS)*100)+"%";
+
+    if(countdownSec <= 3 && countdownSec > 0){
+      countNum.classList.add("urgent");
+      progressFill.classList.add("urgent");
+      try{ playCountTick(); }catch(e){}
+    }
+
+    if(countdownSec <= 0){
+      clearInterval(countdownTimer);
+      lockBetsAndSpin();
+    }
+  }, 1000);
+}
+
+function lockBetsAndSpin(){
+  betPanel.classList.add("locked");
+  countNum.classList.remove("urgent");
+  countNum.classList.add("spinning");
+  progressFill.classList.remove("urgent");
+  progressFill.classList.add("spinning");
+  progressFill.style.width = "100%";
+  phaseLabel.className = "phase-label spin-phase";
+  phaseLabel.textContent = "◌ GIRANDO...";
+  countLabel.textContent = "Rodada em andamento";
+  countNum.textContent = "—";
+  spin();
+}
+
+/* ─── SPIN ─── */
+const REPEATS=7;
 
 function spin(){
   if(isSpinning) return;
-  isSpinning = true;
-  btn.disabled = true;
+  ensureAudio();
+  isSpinning=true;
 
-  // reset result
-  rNum.className   = "result-number idle";
-  rNum.textContent = "…";
-  rPill.className  = "pill";
-  rPill2.className = "pill2";
+  rNum.className="result-number idle";
+  rNum.textContent="…";
+  rPill.className="pill";
+  rPill2.className="pill2";
 
-  const winIdx = Math.floor(Math.random()*NUMS.length);
-  const winNum = NUMS[winIdx];
+  const winIdx=Math.floor(Math.random()*NUMS.length);
+  const winNum=NUMS[winIdx];
 
-  /* build strip */
-  track.innerHTML = "";
-  const allNums = [];
+  track.innerHTML="";
+  const allNums=[];
   for(let r=0;r<REPEATS;r++) NUMS.forEach(n=>allNums.push(n));
+  const targetGlobal=(REPEATS-1)*NUMS.length+winIdx;
+  allNums.forEach(n=>track.appendChild(makeCard(n)));
 
-  // target: last repetition's winIdx
-  const targetGlobal = (REPEATS-1)*NUMS.length + winIdx;
+  const S=STRIDE(), cw=CARD_W();
+  const cx=clip.getBoundingClientRect().width/2;
+  const finalTX=-(targetGlobal*S-cx+cw/2);
+  const startTX= cx-cw/2;
 
-  allNums.forEach((n,i)=>{
-    track.appendChild(makeCard(n, false));
-  });
-
-  /* metrics */
-  const S   = STRIDE();
-  const cw  = CARD_W();
-  const cx  = clip.getBoundingClientRect().width / 2;
-
-  const finalTX  = -(targetGlobal * S - cx + cw/2);
-  const startTX  =  cx - cw/2;   // first card at center
-
-  track.style.transition = "none";
-  track.style.transform  = `translateX(${startTX}px)`;
+  track.style.transition="none";
+  track.style.transform=`translateX(${startTX}px)`;
   void track.offsetWidth;
 
-  /* animation */
-  const DURATION = 4800 + Math.random()*1500;
-  let start = null;
-  let lastTickCard = -1;
-
+  const DURATION=4800+Math.random()*1500;
+  let start=null, lastCard=-1;
   function ease(t){ return 1-Math.pow(1-t,4); }
 
   function frame(ts){
-    if(!start) start = ts;
-    const t  = Math.min((ts-start)/DURATION, 1);
-    const e  = ease(t);
-    const tx = startTX + (finalTX-startTX)*e;
+    if(!start) start=ts;
+    const t=Math.min((ts-start)/DURATION,1);
+    const e=ease(t);
+    const tx=startTX+(finalTX-startTX)*e;
+    track.style.transform=`translateX(${tx}px)`;
 
-    track.style.transform = `translateX(${tx}px)`;
-
-    /* tick sound: fire when a new card crosses the center pointer */
-    const currentCard = Math.round((cx - tx - cw/2) / S);
-    if(currentCard !== lastTickCard && currentCard >= 0 && currentCard < allNums.length){
-      lastTickCard = currentCard;
-      // speed: fast at start, slow at end → affects pitch
-      const speed = t < 0.01 ? 1 : (1-e)*2; // rough speed proxy
-      const pitch = 0.85 + speed*0.7;
-      const vol   = t > 0.75 ? 0.22 : 0.14;
-      playTick(pitch, vol);
+    const cur=Math.round((cx-tx-cw/2)/S);
+    if(cur!==lastCard&&cur>=0&&cur<allNums.length){
+      lastCard=cur;
+      const speed=(1-e)*2;
+      playTick(0.85+speed*0.7, t>0.75?0.22:0.14);
     }
 
-    if(t < 1){
+    if(t<1){
       requestAnimationFrame(frame);
     } else {
-      track.style.transform = `translateX(${finalTX}px)`;
+      track.style.transform=`translateX(${finalTX}px)`;
 
-      // swap winner card to flame version
-      const winCard = track.children[targetGlobal];
-      const c = cls(winNum);
-      winCard.className = "card winner winner-white";
-      winCard.innerHTML = `
-        <div class="card-num" style="color:#c0392b">${winNum}</div>
-        <div class="card-icon" style="color:#c0392b;opacity:1">${FLAME_SVG}</div>`;
+      const wCard=track.children[targetGlobal];
+      const c=cls(winNum);
+      wCard.className="card winner winner-white";
+      wCard.innerHTML=`<div class="card-num" style="color:#c0392b">${winNum}</div><div class="card-icon" style="color:#c0392b;opacity:1">${FLAME_SVG}</div>`;
 
       playLand();
       if(navigator.vibrate) navigator.vibrate([80,40,120]);
 
-      showResult(winNum);
-      addHist(winNum);
-      updateStats(winNum);
+      rNum.className=`result-number ${c} pop`;
+      rNum.textContent=winNum;
+      rPill.className=`pill ${c} show`;
+      rPill.textContent=CNAMES[c];
+      rPill2.className="pill2 show";
+      rPill2.textContent=winNum===0?"ZERO":winNum%2===0?"PAR":"ÍMPAR";
 
-      isSpinning  = false;
-      btn.disabled = false;
+      addHist(winNum);
+
+      // ── RESOLVE BET (lógica correta de cassino) ──
+      setTimeout(()=>{
+        if(betColor){
+          const amt = getBetAmount();
+          if(betColor === c){
+            // GANHOU: devolve a aposta + o lucro
+            // Ex: apostou R$250 no vermelho (×2) → recebe R$500 de volta, lucro = R$250
+            const totalReturn = amt * MULT[c];   // total que volta pro saldo
+            const profit      = totalReturn - amt; // lucro líquido
+
+            updateBalance(totalReturn); // já debitamos antes, agora retornamos o total
+
+            if(c === "green"){
+              playJackpot();
+              showToastMsg("JACKPOT! 🎰","Branco acertado!","🤑",true,"+"+fmtMoney(profit));
+            } else {
+              playWin();
+              showToastMsg("GANHOU!","Cor certa!","🎉",true,"+"+fmtMoney(profit));
+            }
+          } else {
+            // PERDEU: já debitou antes, não faz nada
+            playLose();
+            showToastMsg("PERDEU","Tente novamente","😔",false,"-"+fmtMoney(amt));
+          }
+          clearBet();
+        }
+
+        isSpinning=false;
+        // Aguarda 3s após a rodada e recomeça o countdown
+        setTimeout(()=>{ startCountdown(); }, 3000);
+      }, 400);
     }
   }
 
   requestAnimationFrame(frame);
 }
 
-/* ─────────────────────────────────────
-   UI
-───────────────────────────────────── */
-function showResult(n){
-  const c = cls(n);
-  rNum.className   = `result-number ${c} pop`;
-  rNum.textContent = n;
-  rPill.className  = `pill ${c} show`;
-  rPill.textContent = CNAMES[c];
-  rPill2.className = "pill2 show";
-  rPill2.textContent = n===0?"ZERO":n%2===0?"PAR":"ÍMPAR";
+/* Debita aposta ao confirmar a cor (antes da rodada girar) */
+function selectBetAndDebit(color){
+  ensureAudio();
+  if(isSpinning) return;
+  const amt = getBetAmount();
+  if(amt <= 0){ betInput.focus(); return; }
+  if(amt > balance){ showToastMsg("Saldo insuficiente","","❌",false); return; }
+
+  // Se já tinha apostado nessa cor, cancela e devolve
+  if(betColor === color){
+    if(betColor !== null){
+      updateBalance(amt); // devolve o valor debitado anteriormente
+    }
+    betColor = null;
+    document.querySelectorAll(".bet-btn").forEach(b=>b.classList.remove("selected"));
+    updateBetDisplay();
+    return;
+  }
+
+  // Se trocou de cor, devolve o anterior
+  if(betColor !== null){
+    updateBalance(amt); // devolve anterior
+  }
+
+  // Debita novo valor
+  updateBalance(-amt);
+  betColor = color;
+
+  document.querySelectorAll(".bet-btn").forEach(b=>b.classList.remove("selected"));
+  document.getElementById("bb"+cap(color)).classList.add("selected");
+  document.getElementById("pl"+cap(color)).textContent = fmtMoney(amt);
+  updateBetDisplay();
+}
+
+// Sobrescreve o onclick dos botões para usar a nova lógica
+document.getElementById("bbRed").onclick   = ()=> selectBetAndDebit("red");
+document.getElementById("bbBlack").onclick = ()=> selectBetAndDebit("black");
+document.getElementById("bbGreen").onclick = ()=> selectBetAndDebit("green");
+
+// clearBet também devolve se havia aposta
+function clearBet(){
+  if(betColor !== null && !isSpinning){
+    const amt = getBetAmount();
+    updateBalance(amt); // devolve
+  }
+  betColor=null;
+  document.querySelectorAll(".bet-btn").forEach(b=>b.classList.remove("selected"));
+  updateBetDisplay();
 }
 
 function addHist(n){
-  const c = cls(n);
-  const d = document.createElement("div");
-  d.className = `hc ${c} new`;
-  d.textContent = n;
+  const c=cls(n);
+  const d=document.createElement("div");
+  d.className=`hc ${c} new`;
+  d.textContent=n;
   hist.prepend(d);
   while(hist.children.length>20) hist.removeChild(hist.lastChild);
   setTimeout(()=>d.classList.remove("new"),400);
 }
 
-function updateStats(n){
-  stats[cls(n)]++;
-  document.getElementById("sR").textContent = stats.red;
-  document.getElementById("sB").textContent = stats.black;
-  document.getElementById("sG").textContent = stats.green;
-}
-
-/* ─────────────────────────────────────
-   INIT — static strip at rest
-───────────────────────────────────── */
+/* ─── INIT ─── */
 (function init(){
   for(let r=0;r<3;r++) NUMS.forEach(n=>track.appendChild(makeCard(n)));
-  const cx = clip.getBoundingClientRect().width/2;
-  track.style.transform = `translateX(${cx - CARD_W()/2}px)`;
+  const cx=clip.getBoundingClientRect().width/2;
+  track.style.transform=`translateX(${cx-CARD_W()/2}px)`;
+  updateBetDisplay();
+  // Inicia o ciclo automático com um pequeno delay
+  setTimeout(()=>{ startCountdown(); }, 800);
 })();
 </script>
 </body>
