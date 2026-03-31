@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#111318;
+  --surface:#1a1d24;
+  --card-size:72px;
+  --gap:8px;
+  --red:#c0392b;
+  --red-dark:#922b21;
+  --black:#23262e;
+  --black-border:#2e323c;
+  --green:#1e8449;
+  --green-dark:#145a32;
+  --gold:#e8c84a;
+  --text-muted:rgba(255,255,255,0.3);
+}
+
+body{
+  background:var(--bg);
+  font-family:'Rajdhani',sans-serif;
+  color:#fff;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:24px 16px;
+  gap:28px;
+}
+
+.logo{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(16px,4vw,26px);
+  font-weight:900;
+  letter-spacing:6px;
+  color:#fff;
+  text-transform:uppercase;
+  opacity:.85;
+}
+
+/* ═══════════════════════════════
+   STRIP
+═══════════════════════════════ */
+.strip-shell{
+  width:100%;
+  max-width:700px;
+  position:relative;
+}
+
+/* center pointer — white vertical line + triangle */
+.pointer{
+  position:absolute;
+  top:-6px; bottom:-6px;
+  left:50%;
+  transform:translateX(-50%);
+  width:3px;
+  background:#fff;
+  z-index:20;
+  pointer-events:none;
+}
+.pointer::before{
+  content:'';
+  position:absolute;
+  top:-10px; left:50%;
+  transform:translateX(-50%);
+  border-left:8px solid transparent;
+  border-right:8px solid transparent;
+  border-top:12px solid #fff;
+}
+.pointer::after{
+  content:'';
+  position:absolute;
+  bottom:-10px; left:50%;
+  transform:translateX(-50%);
+  border-left:8px solid transparent;
+  border-right:8px solid transparent;
+  border-bottom:12px solid #fff;
+}
+
+/* fade edges */
+.strip-shell::before,
+.strip-shell::after{
+  content:'';
+  position:absolute;
+  top:0; bottom:0;
+  width:100px;
+  z-index:10;
+  pointer-events:none;
+}
+.strip-shell::before{
+  left:0;
+  background:linear-gradient(to right, var(--bg) 0%, transparent 100%);
+}
+.strip-shell::after{
+  right:0;
+  background:linear-gradient(to left, var(--bg) 0%, transparent 100%);
+}
+
+.strip-clip{
+  overflow:hidden;
+  width:100%;
+  padding:16px 0;
+}
+
+.strip-track{
+  display:flex;
+  gap:var(--gap);
+  will-change:transform;
+}
+
+/* ═══════════════════════════════
+   CARDS
+═══════════════════════════════ */
+.card{
+  flex-shrink:0;
+  width:var(--card-size);
+  height:var(--card-size);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Orbitron',sans-serif;
+  font-size:18px;
+  font-weight:700;
+  position:relative;
+  user-select:none;
+  border:2px solid transparent;
+  transition:transform .1s;
+}
+
+/* number label */
+.card-num{
+  position:absolute;
+  top:8px; left:0; right:0;
+  text-align:center;
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:1px;
+  line-height:1;
+}
+
+/* small suit icon below number */
+.card-icon{
+  position:absolute;
+  bottom:10px; left:0; right:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:.5;
+}
+.card-icon svg{ width:18px; height:18px; }
+
+.card.red{
+  background:var(--red);
+  border-color:rgba(255,255,255,0.08);
+}
+.card.black{
+  background:var(--black);
+  border-color:var(--black-border);
+}
+.card.green{
+  background:var(--green);
+  border-color:rgba(255,255,255,0.08);
+}
+
+/* ── WINNER card (center highlight) ── */
+.card.winner{
+  transform:scale(1.18);
+  z-index:5;
+  border-color:rgba(255,255,255,0.55) !important;
+  box-shadow:0 0 0 2px rgba(255,255,255,0.15);
+}
+
+/* winner has white background + flame icon */
+.card.winner-white{
+  background:#fff !important;
+  border-color:#fff !important;
+}
+.card.winner-white .card-num{ color:#c0392b; }
+.card.winner-white .card-icon{ opacity:1; }
+.card.winner-white .card-icon svg path{ fill:#c0392b; }
+
+/* ═══════════════════════════════
+   RESULT PANEL
+═══════════════════════════════ */
+.result-panel{
+  width:100%;
+  max-width:700px;
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;
+  padding:16px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:72px;
+}
+.result-left{}
+.result-label{
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  margin-bottom:3px;
+}
+.result-number{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(32px,8vw,52px);
+  font-weight:900;
+  line-height:1;
+}
+.result-number.idle{ color:rgba(255,255,255,.1); }
+.result-number.red  { color:#e74c3c; }
+.result-number.green{ color:#2ecc71; }
+.result-number.black{ color:#fff; }
+
+@keyframes popIn{
+  0%  {transform:scale(.55);opacity:0}
+  65% {transform:scale(1.1)}
+  100%{transform:scale(1);opacity:1}
+}
+.result-number.pop{ animation:popIn .4s cubic-bezier(.34,1.56,.64,1) both }
+
+.result-right{ display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+.pill{
+  padding:4px 14px;
+  border-radius:99px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  opacity:0;
+  transform:translateY(6px);
+  transition:all .35s ease .1s;
+}
+.pill.show{ opacity:1; transform:translateY(0); }
+.pill.red  { background:rgba(192,57,43,.25);  color:#e74c3c; border:1px solid rgba(192,57,43,.4); }
+.pill.green{ background:rgba(30,132,73,.25);  color:#2ecc71; border:1px solid rgba(30,132,73,.4); }
+.pill.black{ background:rgba(255,255,255,.07); color:#fff;   border:1px solid rgba(255,255,255,.2); }
+.pill2{
+  font-size:10px;
+  color:var(--text-muted);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  opacity:0;
+  transition:opacity .35s ease .2s;
+}
+.pill2.show{ opacity:1; }
+
+/* ═══════════════════════════════
+   HISTORY
+═══════════════════════════════ */
+.section-wrap{ width:100%; max-width:700px; }
+.section-label{
+  font-family:'Orbitron',sans-serif;
+  font-size:9px;
+  letter-spacing:3px;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.hist-strip{ overflow:hidden; }
+.hist-track{ display:flex; gap:7px; }
+
+.hc{
+  flex-shrink:0;
+  width:42px; height:50px;
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Orbitron',sans-serif;
+  font-size:13px; font-weight:700;
+  border:1px solid transparent;
+}
+.hc.red  { background:var(--red);   border-color:rgba(255,255,255,.07); }
+.hc.black{ background:var(--black); border-color:var(--black-border); }
+.hc.green{ background:var(--green); border-color:rgba(255,255,255,.07); }
+
+@keyframes hcIn{
+  0%  {transform:scale(.3) translateY(12px);opacity:0}
+  65% {transform:scale(1.12) translateY(-2px);opacity:1}
+  100%{transform:scale(1) translateY(0)}
+}
+.hc.new{ animation:hcIn .38s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+/* ═══════════════════════════════
+   STATS
+═══════════════════════════════ */
+.stats-row{
+  width:100%; max-width:700px;
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
+}
+.sb{
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:10px;
+  padding:10px; text-align:center;
+}
+.sv{
+  font-family:'Orbitron',sans-serif;
+  font-size:20px; font-weight:700;
+}
+.sv.r{ color:#e74c3c; }
+.sv.g{ color:#2ecc71; }
+.sv.w{ color:#fff; }
+.sl{ font-size:10px; color:var(--text-muted); letter-spacing:1.5px; text-transform:uppercase; margin-top:1px; }
+
+/* ═══════════════════════════════
+   BUTTON
+═══════════════════════════════ */
+.btn{
+  position:relative;
+  width:100%; max-width:280px;
+  padding:16px;
+  font-family:'Orbitron',sans-serif;
+  font-size:14px; font-weight:700; letter-spacing:3px;
+  text-transform:uppercase;
+  border:none; border-radius:10px;
+  cursor:pointer; overflow:hidden;
+  background:#c0392b;
+  color:#fff;
+  transition:background .15s, transform .1s;
+}
+.btn:hover:not(:disabled){ background:#a93226; transform:translateY(-1px); }
+.btn:active:not(:disabled){ transform:translateY(1px); }
+.btn:disabled{
+  background:#2e1a1a;
+  color:rgba(255,255,255,.25);
+  cursor:not-allowed;
+}
+.btn::after{
+  content:''; position:absolute; top:0; left:-100%;
+  width:60%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
+  transition:left .45s;
+}
+.btn:hover:not(:disabled)::after{ left:160%; }
+</style>
+</head>
+<body>
+
+<div class="logo">Double</div>
+
+<!-- STRIP -->
+<div class="strip-shell">
+  <div class="pointer"></div>
+  <div class="strip-clip">
+    <div class="strip-track" id="track"></div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="result-panel">
+  <div class="result-left">
+    <div class="result-label">Último resultado</div>
+    <div class="result-number idle" id="rNum">—</div>
+  </div>
+  <div class="result-right">
+    <div class="pill" id="rPill"></div>
+    <div class="pill2" id="rPill2"></div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="section-wrap">
+  <div class="section-label">Histórico</div>
+  <div class="hist-strip"><div class="hist-track" id="hist"></div></div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="sb"><div class="sv r" id="sR">0</div><div class="sl">Vermelho</div></div>
+  <div class="sb"><div class="sv w" id="sB">0</div><div class="sl">Preto</div></div>
+  <div class="sb"><div class="sv g" id="sG">0</div><div class="sl">Zero</div></div>
+</div>
+
+<button class="btn" id="btn" onclick="spin()">&#9654;&nbsp; GIRAR</button>
+
+<script>
+/* ─────────────────────────────────────
+   DATA
+───────────────────────────────────── */
+const NUMS = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const RED  = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+function cls(n){ return n===0?"green":RED.has(n)?"red":"black"; }
+const CNAMES = {red:"Vermelho",black:"Preto",green:"Zero"};
+
+const track  = document.getElementById("track");
+const clip   = document.querySelector(".strip-clip");
+const rNum   = document.getElementById("rNum");
+const rPill  = document.getElementById("rPill");
+const rPill2 = document.getElementById("rPill2");
+const hist   = document.getElementById("hist");
+const btn    = document.getElementById("btn");
+
+let isSpinning = false;
+let stats = {red:0,black:0,green:0};
+
+/* ─────────────────────────────────────
+   AUDIO — roulette tick via Web Audio
+───────────────────────────────────── */
+let audioCtx = null;
+
+function ensureAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+}
+
+function playTick(pitch=1, vol=0.18){
+  try{
+    ensureAudio();
+    // short percussive click: noise burst shaped by quick envelope
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*0.04, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<data.length;i++){
+      // white noise * decaying envelope
+      data[i] = (Math.random()*2-1) * Math.exp(-i/(data.length*0.15));
+    }
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = pitch;
+
+    // band-pass to make it sound more mechanical
+    const bp = audioCtx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 1800 * pitch;
+    bp.Q.value = 0.8;
+
+    const gain = audioCtx.createGain();
+    gain.gain.value = vol;
+
+    src.connect(bp);
+    bp.connect(gain);
+    gain.connect(audioCtx.destination);
+    src.start();
+  } catch(e){}
+}
+
+function playLand(){
+  try{
+    ensureAudio();
+    // heavier thud on landing
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*0.12, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<data.length;i++){
+      data[i] = (Math.random()*2-1) * Math.exp(-i/(data.length*0.08));
+    }
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+
+    const lp = audioCtx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 600;
+
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0.55;
+
+    src.connect(lp); lp.connect(gain); gain.connect(audioCtx.destination);
+    src.start();
+  } catch(e){}
+}
+
+/* ─────────────────────────────────────
+   CARD METRICS
+───────────────────────────────────── */
+function CARD_W(){ return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-size'))||72; }
+function GAP()   { return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'))||8; }
+function STRIDE(){ return CARD_W()+GAP(); }
+
+/* SVG icons */
+const FLAME_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 2C12 2 7 8 7 13a5 5 0 0010 0c0-3-2-6-2-6s-1 2-2 2c-1 0-1-7 1-7z" fill="currentColor"/>
+  <path d="M12 16a2 2 0 000 4 2 2 0 000-4z" fill="currentColor" opacity=".4"/>
+</svg>`;
+
+const DIAMOND_SVG = `<svg viewBox="0 0 24 24" fill="none">
+  <path d="M12 3L20 12L12 21L4 12Z" fill="currentColor"/>
+</svg>`;
+
+function makeCard(n, isWinnerCenter=false){
+  const c = cls(n);
+  const div = document.createElement("div");
+
+  if(isWinnerCenter){
+    div.className = "card winner winner-white";
+    div.innerHTML = `
+      <div class="card-num" style="color:#c0392b">${n}</div>
+      <div class="card-icon" style="color:#c0392b;opacity:1">${FLAME_SVG}</div>`;
+  } else {
+    div.className = `card ${c}`;
+    div.innerHTML = `
+      <div class="card-num">${n}</div>
+      <div class="card-icon" style="color:#fff">${DIAMOND_SVG}</div>`;
+  }
+  return div;
+}
+
+/* ─────────────────────────────────────
+   SPIN
+───────────────────────────────────── */
+const REPEATS = 7;  // full sequences in strip
+
+function spin(){
+  if(isSpinning) return;
+  isSpinning = true;
+  btn.disabled = true;
+
+  // reset result
+  rNum.className   = "result-number idle";
+  rNum.textContent = "…";
+  rPill.className  = "pill";
+  rPill2.className = "pill2";
+
+  const winIdx = Math.floor(Math.random()*NUMS.length);
+  const winNum = NUMS[winIdx];
+
+  /* build strip */
+  track.innerHTML = "";
+  const allNums = [];
+  for(let r=0;r<REPEATS;r++) NUMS.forEach(n=>allNums.push(n));
+
+  // target: last repetition's winIdx
+  const targetGlobal = (REPEATS-1)*NUMS.length + winIdx;
+
+  allNums.forEach((n,i)=>{
+    track.appendChild(makeCard(n, false));
+  });
+
+  /* metrics */
+  const S   = STRIDE();
+  const cw  = CARD_W();
+  const cx  = clip.getBoundingClientRect().width / 2;
+
+  const finalTX  = -(targetGlobal * S - cx + cw/2);
+  const startTX  =  cx - cw/2;   // first card at center
+
+  track.style.transition = "none";
+  track.style.transform  = `translateX(${startTX}px)`;
+  void track.offsetWidth;
+
+  /* animation */
+  const DURATION = 4800 + Math.random()*1500;
+  let start = null;
+  let lastTickCard = -1;
+
+  function ease(t){ return 1-Math.pow(1-t,4); }
+
+  function frame(ts){
+    if(!start) start = ts;
+    const t  = Math.min((ts-start)/DURATION, 1);
+    const e  = ease(t);
+    const tx = startTX + (finalTX-startTX)*e;
+
+    track.style.transform = `translateX(${tx}px)`;
+
+    /* tick sound: fire when a new card crosses the center pointer */
+    const currentCard = Math.round((cx - tx - cw/2) / S);
+    if(currentCard !== lastTickCard && currentCard >= 0 && currentCard < allNums.length){
+      lastTickCard = currentCard;
+      // speed: fast at start, slow at end → affects pitch
+      const speed = t < 0.01 ? 1 : (1-e)*2; // rough speed proxy
+      const pitch = 0.85 + speed*0.7;
+      const vol   = t > 0.75 ? 0.22 : 0.14;
+      playTick(pitch, vol);
+    }
+
+    if(t < 1){
+      requestAnimationFrame(frame);
+    } else {
+      track.style.transform = `translateX(${finalTX}px)`;
+
+      // swap winner card to flame version
+      const winCard = track.children[targetGlobal];
+      const c = cls(winNum);
+      winCard.className = "card winner winner-white";
+      winCard.innerHTML = `
+        <div class="card-num" style="color:#c0392b">${winNum}</div>
+        <div class="card-icon" style="color:#c0392b;opacity:1">${FLAME_SVG}</div>`;
+
+      playLand();
+      if(navigator.vibrate) navigator.vibrate([80,40,120]);
+
+      showResult(winNum);
+      addHist(winNum);
+      updateStats(winNum);
+
+      isSpinning  = false;
+      btn.disabled = false;
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+/* ─────────────────────────────────────
+   UI
+───────────────────────────────────── */
+function showResult(n){
+  const c = cls(n);
+  rNum.className   = `result-number ${c} pop`;
+  rNum.textContent = n;
+  rPill.className  = `pill ${c} show`;
+  rPill.textContent = CNAMES[c];
+  rPill2.className = "pill2 show";
+  rPill2.textContent = n===0?"ZERO":n%2===0?"PAR":"ÍMPAR";
+}
+
+function addHist(n){
+  const c = cls(n);
+  const d = document.createElement("div");
+  d.className = `hc ${c} new`;
+  d.textContent = n;
+  hist.prepend(d);
+  while(hist.children.length>20) hist.removeChild(hist.lastChild);
+  setTimeout(()=>d.classList.remove("new"),400);
+}
+
+function updateStats(n){
+  stats[cls(n)]++;
+  document.getElementById("sR").textContent = stats.red;
+  document.getElementById("sB").textContent = stats.black;
+  document.getElementById("sG").textContent = stats.green;
+}
+
+/* ─────────────────────────────────────
+   INIT — static strip at rest
+───────────────────────────────────── */
+(function init(){
+  for(let r=0;r<3;r++) NUMS.forEach(n=>track.appendChild(makeCard(n)));
+  const cx = clip.getBoundingClientRect().width/2;
+  track.style.transform = `translateX(${cx - CARD_W()/2}px)`;
+})();
+</script>
+</body>
+</html>
