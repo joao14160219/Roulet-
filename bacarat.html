@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="icon.png">
+<title>Bacarat • plinio.bet</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#07111b;
+  --panel:#122232;
+  --panel-2:#0e1b28;
+  --line:rgba(255,255,255,.08);
+  --text-soft:rgba(255,255,255,.72);
+  --green:#29d46a;
+  --red:#ff4d4f;
+  --blue:#4f8cff;
+  --gold:#f5bf3a;
+}
+
+body{
+  min-height:100vh;
+  background:linear-gradient(180deg,#06111b 0%,#0b1824 100%);
+  color:#fff;
+  font-family:Arial,sans-serif;
+}
+
+.page-topbar{
+  max-width:1200px;
+  margin:0 auto;
+  padding:12px 12px 0;
+}
+
+.topbar{
+  background:#111827;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.page-back,
+.header-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.page-back{
+  background:#1f2937;
+  color:#fff;
+  text-decoration:none;
+  font-size:16px;
+}
+
+.header-icon{
+  background:#2ecc71;
+  color:#08111a;
+  font-size:18px;
+  font-weight:900;
+}
+
+.header-title{
+  font-size:20px;
+  font-weight:800;
+}
+
+.header-sub{
+  margin-top:2px;
+  font-size:11px;
+  color:rgba(255,255,255,.65);
+}
+
+.live-pill{
+  padding:7px 11px;
+  border-radius:999px;
+  background:#1f2937;
+  border:1px solid var(--line);
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.app{
+  max-width:1200px;
+  margin:0 auto;
+  padding:12px;
+  display:grid;
+  grid-template-columns:320px 1fr;
+  gap:14px;
+}
+
+.side-panel,
+.table-panel{
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);
+  border:1px solid var(--line);
+  border-radius:18px;
+}
+
+.side-panel{
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.balance-box,
+.info-box,
+.result-box{
+  background:rgba(0,0,0,.16);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+}
+
+.label{
+  font-size:12px;
+  color:var(--text-soft);
+  margin-bottom:6px;
+}
+
+.balance-value{
+  font-size:28px;
+  font-weight:900;
+}
+
+.bet-input-row{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:8px;
+}
+
+.bet-input{
+  width:100%;
+  border:none;
+  outline:none;
+  border-radius:12px;
+  background:#0b1520;
+  border:1px solid var(--line);
+  color:#fff;
+  padding:12px;
+  font-size:20px;
+  font-weight:800;
+}
+
+.mini-btn,
+.action-btn,
+.bet-type{
+  border:none;
+  cursor:pointer;
+  font-weight:800;
+}
+
+.mini-btn{
+  border-radius:12px;
+  padding:0 12px;
+  background:#1a2c3d;
+  color:#fff;
+}
+
+.bet-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+
+.bet-type{
+  text-align:left;
+  border-radius:14px;
+  padding:12px 14px;
+  background:#132536;
+  border:1px solid var(--line);
+  color:#fff;
+}
+.bet-type small{
+  display:block;
+  font-size:11px;
+  color:rgba(255,255,255,.7);
+  margin-top:3px;
+}
+.bet-type.active.player{ outline:2px solid rgba(79,140,255,.55); }
+.bet-type.active.banker{ outline:2px solid rgba(255,77,79,.55); }
+.bet-type.active.tie{ outline:2px solid rgba(245,191,58,.65); }
+
+.action-btn{
+  width:100%;
+  border-radius:14px;
+  padding:14px;
+  font-size:16px;
+  color:#07111b;
+  background:linear-gradient(180deg,#29d46a,#19af52);
+}
+.action-btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.result-box h3,
+.info-box h3{
+  font-size:14px;
+  margin-bottom:8px;
+}
+
+.result-line{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  font-size:13px;
+  padding:5px 0;
+}
+
+.status-pill{
+  margin-top:8px;
+  padding:9px 10px;
+  border-radius:10px;
+  background:#102030;
+  color:var(--text-soft);
+  font-size:13px;
+  line-height:1.4;
+}
+.status-pill.win{ color:#a8f2bf; }
+.status-pill.lose{ color:#ffb2b2; }
+.status-pill.tie{ color:#ffe196; }
+
+.info-box ul{
+  padding-left:18px;
+  color:var(--text-soft);
+  display:grid;
+  gap:5px;
+  font-size:13px;
+}
+
+.table-panel{
+  padding:14px;
+}
+
+.table-surface{
+  border-radius:18px;
+  padding:14px;
+  background:
+    radial-gradient(circle at center, rgba(41,212,106,.09), transparent 40%),
+    linear-gradient(180deg,#0f1f2a 0%, #0b1722 100%);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.result-banner{
+  text-align:center;
+  padding:12px;
+  border-radius:14px;
+  background:#102030;
+  border:1px solid var(--line);
+  margin-bottom:12px;
+}
+
+.result-banner strong{
+  display:block;
+  font-size:22px;
+  margin-bottom:4px;
+}
+
+.hands{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.hand-area{
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:12px;
+  min-height:240px;
+}
+
+.hand-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.hand-title{
+  font-size:18px;
+  font-weight:800;
+}
+
+.hand-total{
+  min-width:40px;
+  text-align:center;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#142535;
+  font-weight:800;
+}
+
+.cards{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  min-height:110px;
+}
+
+.empty-text{
+  color:var(--text-soft);
+  font-size:13px;
+  padding-top:8px;
+}
+
+.card{
+  width:74px;
+  height:102px;
+  border-radius:12px;
+  background:#fff;
+  color:#101214;
+  padding:8px;
+  box-shadow:0 10px 22px rgba(0,0,0,.25);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  animation:cardIn .24s ease;
+}
+.card.red{ color:#c62828; }
+.card-top,
+.card-bottom{
+  font-weight:900;
+  font-size:18px;
+  line-height:1;
+}
+.card-center{
+  text-align:center;
+  font-size:24px;
+}
+.card-bottom{
+  transform:rotate(180deg);
+}
+
+.summary-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:12px;
+}
+
+.summary-box{
+  border-radius:14px;
+  padding:10px;
+  background:#102030;
+  border:1px solid var(--line);
+  text-align:center;
+}
+.summary-box span{
+  display:block;
+  font-size:11px;
+  color:var(--text-soft);
+  margin-bottom:4px;
+}
+.summary-box strong{
+  font-size:18px;
+}
+
+.history-bar{
+  margin-top:12px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.hist-pill{
+  padding:7px 10px;
+  border-radius:999px;
+  background:#102030;
+  border:1px solid var(--line);
+  font-size:12px;
+  font-weight:800;
+}
+.hist-pill.player{ color:#8fbcff; }
+.hist-pill.banker{ color:#ffb1b2; }
+.hist-pill.tie{ color:#ffe196; }
+
+@keyframes cardIn{
+  from{ transform:translateY(8px) scale(.94); opacity:0; }
+  to{ transform:translateY(0) scale(1); opacity:1; }
+}
+
+.win-popup{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(.86);
+  min-width:220px;
+  padding:18px 22px;
+  border-radius:18px;
+  background:linear-gradient(180deg,#16321e 0%,#0e2415 100%);
+  border:1px solid rgba(41,212,106,.45);
+  box-shadow:0 18px 45px rgba(0,0,0,.35);
+  text-align:center;
+  z-index:30;
+  opacity:0;
+  pointer-events:none;
+}
+.win-popup.show{
+  animation:popupIn .25s ease forwards, popupOut .35s ease 1.8s forwards;
+}
+.win-popup-title{
+  font-size:13px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:#9ce8b6;
+}
+.win-popup-value{
+  margin-top:8px;
+  font-size:32px;
+  font-weight:900;
+}
+.win-popup-sub{
+  margin-top:6px;
+  color:rgba(255,255,255,.75);
+  font-size:13px;
+}
+
+@keyframes popupIn{
+  to{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+}
+@keyframes popupOut{
+  to{ opacity:0; transform:translate(-50%,-56%) scale(.96); }
+}
+
+@media (max-width:920px){
+  .app{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .side-panel{ order:2; }
+  .table-panel{ order:1; }
+  .topbar{ flex-wrap:wrap; }
+}
+
+@media (max-width:640px){
+  .page-topbar,
+  .app{
+    padding:10px;
+  }
+  .topbar{
+    padding:12px;
+  }
+  .header-title{ font-size:18px; }
+  .live-pill{
+    font-size:11px;
+    padding:6px 9px;
+  }
+  .table-panel,
+  .side-panel,
+  .table-surface{
+    padding:10px;
+  }
+  .hands{ grid-template-columns:1fr; }
+  .hand-area{
+    min-height:170px;
+    padding:10px;
+  }
+  .cards{
+    gap:8px;
+    justify-content:center;
+    min-height:86px;
+  }
+  .card{
+    width:58px;
+    height:82px;
+    padding:6px;
+    border-radius:10px;
+  }
+  .card-top,
+  .card-bottom{ font-size:14px; }
+  .card-center{ font-size:18px; }
+  .summary-row{ grid-template-columns:1fr; }
+  .bet-input-row{ grid-template-columns:1fr auto auto; }
+  .bet-input{
+    font-size:18px;
+    padding:11px;
+  }
+  .action-btn,
+  .bet-type{ font-size:14px; }
+  .balance-value{ font-size:24px; }
+  .result-banner strong{ font-size:18px; }
+  .history-bar{ gap:6px; }
+}
+</style>
+</head>
+<body>
+<div class="win-popup" id="winPopup">
+  <div class="win-popup-title">Você ganhou</div>
+  <div class="win-popup-value" id="winPopupValue">R$ 0,00</div>
+  <div class="win-popup-sub">Vitória no Bacarat</div>
+</div>
+
+<header class="page-topbar">
+  <div class="topbar">
+    <div class="header-left">
+      <a href="hub.html" class="page-back" aria-label="Voltar ao início">←</a>
+      <div class="header-icon">♠</div>
+      <div>
+        <div class="header-title">Bacarat</div>
+        <div class="header-sub">plinio.bet</div>
+      </div>
+    </div>
+    <div class="live-pill">AO VIVO</div>
+  </div>
+</header>
+
+<div class="app">
+  <aside class="side-panel">
+    <div class="balance-box">
+      <div class="label">Saldo</div>
+      <div class="balance-value" id="balanceValue">R$ 0,00</div>
+    </div>
+
+    <div>
+      <div class="label">Valor da aposta</div>
+      <div class="bet-input-row">
+        <input class="bet-input" id="betInput" type="number" value="10" min="1" step="1">
+        <button class="mini-btn" type="button" onclick="halfBet()">½</button>
+        <button class="mini-btn" type="button" onclick="doubleBet()">2×</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="label">Escolha sua aposta</div>
+      <div class="bet-grid">
+        <button class="bet-type player active" id="bet-player" type="button" onclick="pickBet('player')">Player<small>Pagamento 1:1</small></button>
+        <button class="bet-type banker" id="bet-banker" type="button" onclick="pickBet('banker')">Banker<small>Pagamento 0.95:1</small></button>
+        <button class="bet-type tie" id="bet-tie" type="button" onclick="pickBet('tie')">Tie<small>Pagamento 8:1</small></button>
+      </div>
+    </div>
+
+    <button class="action-btn" id="dealBtn" type="button" onclick="playRound()">Distribuir cartas</button>
+
+    <div class="result-box">
+      <h3>Resumo da aposta</h3>
+      <div class="result-line"><span>Aposta selecionada</span><strong id="selectedBetLabel">Player</strong></div>
+      <div class="result-line"><span>Pagamento</span><strong id="selectedOdds">1.00x</strong></div>
+      <div class="result-line"><span>Lucro se ganhar</span><strong id="profitPreview">R$ 10,00</strong></div>
+      <div class="status-pill" id="statusPill">Escolha um lado e distribua as cartas.</div>
+    </div>
+
+    <div class="info-box">
+      <h3>Regras rápidas</h3>
+      <ul>
+        <li>Conta apenas o último dígito: total % 10.</li>
+        <li>8 ou 9 inicial = natural e encerra a rodada.</li>
+        <li>Banker paga com 5% de comissão.</li>
+        <li>Tie paga 8:1 nesta versão.</li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="table-panel">
+    <div class="table-surface">
+      <div class="result-banner" id="resultBanner">
+        <strong>Aguardando rodada</strong>
+        <span>Player, Banker ou Tie</span>
+      </div>
+
+      <div class="hands">
+        <section class="hand-area">
+          <div class="hand-top">
+            <div class="hand-title">Player</div>
+            <div class="hand-total" id="playerTotal">0</div>
+          </div>
+          <div class="cards" id="playerCards"></div>
+          <div class="empty-text" id="playerEmpty">As cartas do Player vão aparecer aqui.</div>
+        </section>
+
+        <section class="hand-area">
+          <div class="hand-top">
+            <div class="hand-title">Banker</div>
+            <div class="hand-total" id="bankerTotal">0</div>
+          </div>
+          <div class="cards" id="bankerCards"></div>
+          <div class="empty-text" id="bankerEmpty">As cartas do Banker vão aparecer aqui.</div>
+        </section>
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-box"><span>Resultado</span><strong id="winnerBox">—</strong></div>
+        <div class="summary-box"><span>Sua aposta</span><strong id="chosenBox">Player</strong></div>
+        <div class="summary-box"><span>Lucro</span><strong id="profitBox">R$ 0,00</strong></div>
+      </div>
+
+      <div class="history-bar" id="historyBar"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = 'casinoBalance';
+const SUITS = ['♠','♥','♦','♣'];
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+let balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+let selectedBet = 'player';
+let history = [];
+let shoe = [];
+let dealing = false;
+let autoRoundTimer = null;
+let countdownTimer = null;
+let secondsToNextRound = 15;
+
+const balanceValue = document.getElementById('balanceValue');
+const betInput = document.getElementById('betInput');
+const statusPill = document.getElementById('statusPill');
+const resultBanner = document.getElementById('resultBanner');
+const playerCards = document.getElementById('playerCards');
+const bankerCards = document.getElementById('bankerCards');
+const playerTotalEl = document.getElementById('playerTotal');
+const bankerTotalEl = document.getElementById('bankerTotal');
+const playerEmpty = document.getElementById('playerEmpty');
+const bankerEmpty = document.getElementById('bankerEmpty');
+const selectedBetLabel = document.getElementById('selectedBetLabel');
+const selectedOdds = document.getElementById('selectedOdds');
+const profitPreview = document.getElementById('profitPreview');
+const winnerBox = document.getElementById('winnerBox');
+const chosenBox = document.getElementById('chosenBox');
+const profitBox = document.getElementById('profitBox');
+const historyBar = document.getElementById('historyBar');
+const dealBtn = document.getElementById('dealBtn');
+const winPopup = document.getElementById('winPopup');
+const winPopupValue = document.getElementById('winPopupValue');
+
+function formatMoney(value){
+  return 'R$ ' + Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function saveBalance(){
+  localStorage.setItem(STORAGE_KEY, String(balance));
+}
+
+function updateBalance(){
+  balanceValue.textContent = formatMoney(balance);
+}
+
+function getCardValue(rank){
+  if(rank === 'A') return 1;
+  if(['10','J','Q','K'].includes(rank)) return 0;
+  return Number(rank);
+}
+
+function createShoe(decks = 8){
+  const cards = [];
+  for(let d = 0; d < decks; d++){
+    for(const suit of SUITS){
+      for(const rank of RANKS){
+        cards.push({ rank, suit, value: getCardValue(rank) });
+      }
+    }
+  }
+  for(let i = cards.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  return cards;
+}
+
+function ensureShoe(){
+  if(shoe.length < 20) shoe = createShoe(8);
+}
+
+function drawCard(){
+  ensureShoe();
+  return shoe.pop();
+}
+
+function sleep(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function handTotal(hand){
+  return hand.reduce((sum, card) => sum + card.value, 0) % 10;
+}
+
+function renderHand(hand, container, emptyEl){
+  container.innerHTML = '';
+  if(!hand.length){
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  hand.forEach(card => {
+    const div = document.createElement('div');
+    const colorClass = /[♥♦]/.test(card.suit) ? 'red' : '';
+    div.className = `card ${colorClass}`;
+    div.innerHTML = `
+      <div class="card-top">${card.rank}<br>${card.suit}</div>
+      <div class="card-center">${card.suit}</div>
+      <div class="card-bottom">${card.rank}<br>${card.suit}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function renderTable(playerHand = [], bankerHand = []){
+  renderHand(playerHand, playerCards, playerEmpty);
+  renderHand(bankerHand, bankerCards, bankerEmpty);
+  playerTotalEl.textContent = handTotal(playerHand);
+  bankerTotalEl.textContent = handTotal(bankerHand);
+}
+
+function halfBet(){
+  const current = Number(betInput.value || 0);
+  betInput.value = Math.max(1, current / 2).toFixed(2);
+  updatePreview();
+}
+
+function doubleBet(){
+  const current = Number(betInput.value || 0);
+  betInput.value = Math.max(1, current * 2).toFixed(2);
+  updatePreview();
+}
+
+function getOdds(type){
+  if(type === 'player') return 1;
+  if(type === 'banker') return 0.95;
+  return 8;
+}
+
+function pickBet(type){
+  selectedBet = type;
+  document.querySelectorAll('.bet-type').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`bet-${type}`).classList.add('active');
+  selectedBetLabel.textContent = type === 'player' ? 'Player' : type === 'banker' ? 'Banker' : 'Tie';
+  chosenBox.textContent = selectedBetLabel.textContent;
+  updatePreview();
+}
+
+function updatePreview(){
+  const bet = Number(betInput.value || 0);
+  selectedOdds.textContent = getOdds(selectedBet).toFixed(2) + 'x';
+  profitPreview.textContent = formatMoney(Math.max(0, bet * getOdds(selectedBet)));
+}
+
+function bankerShouldDraw(total, playerThirdValue, playerDrew){
+  if(!playerDrew) return total <= 5;
+  if(total <= 2) return true;
+  if(total === 3) return playerThirdValue !== 8;
+  if(total === 4) return playerThirdValue >= 2 && playerThirdValue <= 7;
+  if(total === 5) return playerThirdValue >= 4 && playerThirdValue <= 7;
+  if(total === 6) return playerThirdValue === 6 || playerThirdValue === 7;
+  return false;
+}
+
+function setStatus(message, type = ''){
+  statusPill.className = 'status-pill' + (type ? ` ${type}` : '');
+  statusPill.textContent = message;
+}
+
+function setBanner(title, subtitle){
+  resultBanner.innerHTML = `<strong>${title}</strong><span>${subtitle}</span>`;
+}
+
+function addHistory(winner, pTotal, bTotal){
+  history.unshift({ winner, pTotal, bTotal });
+  if(history.length > 10) history.pop();
+  historyBar.innerHTML = '';
+  history.forEach(item => {
+    const pill = document.createElement('div');
+    pill.className = `hist-pill ${item.winner}`;
+    pill.textContent = `${item.winner.toUpperCase()} ${item.pTotal}-${item.bTotal}`;
+    historyBar.appendChild(pill);
+  });
+}
+
+function showWinPopup(amount){
+  winPopupValue.textContent = formatMoney(amount);
+  winPopup.classList.remove('show');
+  void winPopup.offsetWidth;
+  winPopup.classList.add('show');
+}
+
+function startAutoRounds(){
+  if(autoRoundTimer) clearInterval(autoRoundTimer);
+  if(countdownTimer) clearInterval(countdownTimer);
+
+  secondsToNextRound = 15;
+  setStatus(`Nova rodada automática em ${secondsToNextRound}s.`, '');
+
+  countdownTimer = setInterval(() => {
+    if(dealing) return;
+    secondsToNextRound -= 1;
+    if(secondsToNextRound > 0){
+      setStatus(`Nova rodada automática em ${secondsToNextRound}s.`, '');
+    }
+  }, 1000);
+
+  autoRoundTimer = setInterval(() => {
+    if(!dealing){
+      secondsToNextRound = 15;
+      playRound();
+    }
+  }, 15000);
+}
+
+async function playRound(){
+  if(dealing) return;
+
+  const bet = Number(betInput.value || 0);
+  if(bet <= 0){
+    setStatus('Digite uma aposta válida.', 'lose');
+    return;
+  }
+  if(bet > balance){
+    setStatus('Saldo insuficiente para essa aposta.', 'lose');
+    return;
+  }
+
+  dealing = true;
+  dealBtn.disabled = true;
+  dealBtn.textContent = 'Distribuindo...';
+
+  try {
+    setStatus('Distribuindo cartas...', '');
+
+    balance -= bet;
+    saveBalance();
+    updateBalance();
+
+    const playerHand = [];
+    const bankerHand = [];
+
+    winnerBox.textContent = '—';
+    profitBox.textContent = 'R$ 0,00';
+    setBanner('Distribuindo cartas', 'Player e Banker estão recebendo cartas');
+    renderTable(playerHand, bankerHand);
+
+    playerHand.push(drawCard());
+    renderTable(playerHand, bankerHand);
+    await sleep(700);
+
+    bankerHand.push(drawCard());
+    renderTable(playerHand, bankerHand);
+    await sleep(700);
+
+    playerHand.push(drawCard());
+    renderTable(playerHand, bankerHand);
+    await sleep(700);
+
+    bankerHand.push(drawCard());
+    renderTable(playerHand, bankerHand);
+    await sleep(820);
+
+    let playerTotal = handTotal(playerHand);
+    let bankerTotal = handTotal(bankerHand);
+
+    let notes = [];
+    const natural = playerTotal >= 8 || bankerTotal >= 8;
+    let playerThirdValue = null;
+    let playerDrew = false;
+
+    if(natural){
+      notes.push('Natural detectado.');
+      setStatus('Natural detectado. Encerrando a rodada.', 'tie');
+await sleep(480);
+    }else{
+      if(playerTotal <= 5){
+        setStatus('Player compra a terceira carta...', '');
+        await sleep(420);
+        const third = drawCard();
+        playerHand.push(third);
+        playerThirdValue = third.value;
+        playerDrew = true;
+        renderTable(playerHand, bankerHand);
+        notes.push('Player comprou terceira carta.');
+        await sleep(620);
+      }else{
+        notes.push('Player parou.');
+      }
+
+      bankerTotal = handTotal(bankerHand);
+      if(bankerShouldDraw(bankerTotal, playerThirdValue, playerDrew)){
+        setStatus('Banker compra a terceira carta...', '');
+        await sleep(420);
+        bankerHand.push(drawCard());
+        renderTable(playerHand, bankerHand);
+        notes.push('Banker comprou terceira carta.');
+        await sleep(620);
+      }else{
+        notes.push('Banker parou.');
+      }
+    }
+
+    playerTotal = handTotal(playerHand);
+    bankerTotal = handTotal(bankerHand);
+
+    let winner = 'tie';
+    if(playerTotal > bankerTotal) winner = 'player';
+    else if(bankerTotal > playerTotal) winner = 'banker';
+
+    let payout = 0;
+    let profit = -bet;
+
+    if(selectedBet === winner){
+      if(winner === 'player') payout = bet * 2;
+      else if(winner === 'banker') payout = bet * 1.95;
+      else payout = bet * 9;
+
+      balance += payout;
+      saveBalance();
+      updateBalance();
+      profit = payout - bet;
+    }
+
+    const winnerText = winner === 'player' ? 'Player venceu' : winner === 'banker' ? 'Banker venceu' : 'Empate';
+    setBanner(winnerText, `Player ${playerTotal} • Banker ${bankerTotal}`);
+    winnerBox.textContent = winner === 'player' ? 'Player' : winner === 'banker' ? 'Banker' : 'Tie';
+    profitBox.textContent = (profit >= 0 ? '+' : '-') + formatMoney(Math.abs(profit));
+
+    if(selectedBet === winner){
+      setStatus(`${winnerText}. ${notes.join(' ')}`, winner === 'tie' ? 'tie' : 'win');
+      if(profit > 0) showWinPopup(profit);
+    }else{
+      setStatus(`${winnerText}. ${notes.join(' ')}`, winner === 'tie' ? 'tie' : 'lose');
+    }
+
+    addHistory(winner, playerTotal, bankerTotal);
+  } finally {
+    dealBtn.textContent = 'Distribuir cartas';
+    dealBtn.disabled = false;
+    dealing = false;
+    secondsToNextRound = 15;
+  }
+}
+
+betInput.addEventListener('input', updatePreview);
+window.addEventListener('storage', () => {
+  balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+  updateBalance();
+});
+
+pickBet('player');
+renderTable([], []);
+updateBalance();
+updatePreview();
+setBanner('Aguardando rodada', 'Player, Banker ou Tie');
+startAutoRounds();
+</script>
+</body>
+</html>

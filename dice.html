@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="icon.png">
+    <title>Dice • plinio.bet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        
+        :root {
+            --tw-color-primary: #00ff9d;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .title-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .slider-container {
+            position: relative;
+            height: 56px;
+        }
+        
+        .track {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 36px;
+            border-radius: 9999px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 56px;
+            background: transparent;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 38px;
+            height: 38px;
+            background: #00b8ff;
+            border: 4px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 8px rgba(0, 184, 255, 0.3),
+                        0 25px 50px -12px rgb(0 0 0 / 0.25);
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 38px;
+            height: 38px;
+            background: #00b8ff;
+            border: 4px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 8px rgba(0, 184, 255, 0.3),
+                        0 25px 50px -12px rgb(0 0 0 / 0.25);
+            cursor: pointer;
+        }
+
+        .main-panel-glow {
+            background:
+                radial-gradient(circle at center, rgba(0, 184, 255, 0.08), transparent 48%),
+                linear-gradient(180deg, #0d1724 0%, #0a1420 100%);
+        }
+
+        @media (max-width: 1023px) {
+            input[type="range"]::-webkit-slider-thumb {
+                width: 34px;
+                height: 34px;
+                border-width: 3px;
+            }
+            input[type="range"]::-moz-range-thumb {
+                width: 34px;
+                height: 34px;
+                border-width: 3px;
+            }
+            .slider-container {
+                height: 52px;
+            }
+            .track {
+                height: 24px;
+                top: 56%;
+            }
+            .result-number {
+                font-size: 54px !important;
+            }
+        }
+        
+        .roll-result {
+            animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.2); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .history-item {
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        .result-stage {
+            min-height: 320px;
+        }
+
+        .history-strip::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .history-strip::-webkit-scrollbar-thumb {
+            background: #233548;
+            border-radius: 9999px;
+        }
+
+        .page-topbar {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 12px 12px 0;
+        }
+
+        @media (max-width: 1023px) {
+            .dice-shell {
+                padding: 10px;
+                gap: 10px;
+            }
+
+            .main-panel {
+                min-height: 0;
+            }
+
+            .result-stage {
+                min-height: 220px;
+                padding: 18px 14px 10px;
+                justify-content: flex-start;
+            }
+
+            .manual-stack {
+                display: block;
+                padding-bottom: 14px;
+            }
+
+            .chance-payout-block {
+                margin-top: 16px !important;
+                padding-top: 0 !important;
+            }
+
+            .roll-action-block {
+                margin-top: 16px !important;
+                margin-bottom: 4px !important;
+            }
+
+            .mobile-roll-btn {
+                font-size: 1.25rem !important;
+                padding-top: 14px !important;
+                padding-bottom: 14px !important;
+            }
+
+            .placeholder-block {
+                margin-top: 12px;
+            }
+
+            .placeholder-icon {
+                width: 58px !important;
+                height: 58px !important;
+                font-size: 2rem !important;
+                margin-bottom: 10px !important;
+            }
+
+            .slider-section {
+                padding: 8px 14px 16px;
+            }
+
+            .slider-meta {
+                grid-template-columns: 1fr;
+            }
+
+            .history-section {
+                padding: 12px 14px 14px;
+            }
+
+            .history-strip {
+                gap: 8px;
+            }
+
+            .history-item {
+                width: 108px !important;
+                padding: 10px 12px !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#0a0f1c] text-white min-h-screen">
+    <header class="page-topbar">
+        <div class="bg-[#111827] border border-[#1f2937] rounded-[18px] px-4 lg:px-6 py-4 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <a href="hub.html" class="w-9 h-9 rounded-xl bg-[#1f2937] text-white flex items-center justify-center no-underline text-base shrink-0" aria-label="Voltar ao início">←</a>
+                <div class="w-9 h-9 bg-[#00ff9d] rounded-xl flex items-center justify-center text-[#0a0f1c] text-xl font-bold shrink-0">🎲</div>
+                <div class="min-w-0">
+                    <h1 class="title-font text-xl lg:text-2xl tracking-tight leading-none">Dice</h1>
+                    <div class="text-[11px] text-gray-400 mt-1">plinio.bet</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 bg-[#1f2937] text-[11px] px-3 py-1.5 rounded-3xl shrink-0">
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                AO VIVO
+            </div>
+        </div>
+    </header>
+
+    <div class="dice-shell max-w-7xl mx-auto flex flex-col lg:flex-row gap-3 lg:gap-4 min-h-[calc(100vh-84px)] p-3 lg:p-4">
+
+        <!-- Painel de aposta embaixo no responsivo -->
+        <div class="side-panel w-full lg:w-[270px] bg-[#151c2c] border border-[#1f2937] rounded-[18px] flex flex-col overflow-hidden lg:order-1 order-2">
+            
+            <!-- Mode Tabs -->
+            <div class="px-4 lg:px-6 pt-5 flex gap-2">
+                <button onclick="setTab(0)" id="tab-manual"
+                    class="flex-1 py-3 text-center font-medium rounded-2xl transition-all active-tab">
+                    MANUAL
+                </button>
+                <button onclick="setTab(1)" id="tab-auto"
+                    class="flex-1 py-3 text-center font-medium rounded-2xl transition-all">
+                    AUTO
+                </button>
+            </div>
+
+            <!-- Manual Mode Content -->
+            <div id="manual-content" class="manual-stack flex-1 flex flex-col px-4 lg:px-6">
+                <div class="pt-6">
+                    <div class="text-sm text-gray-400 mb-2">Valor da Aposta</div>
+                    <div class="flex items-center bg-[#1f2937] rounded-3xl px-5 py-4 text-3xl font-medium">
+                        <input id="bet-input" 
+                               type="text" 
+                               value="10.00" 
+                               oninput="formatBet(this)"
+                               class="bg-transparent flex-1 outline-none text-white font-mono text-lg">
+                        <span class="text-[#00b8ff] text-xl font-bold">R$</span>
+                    </div>
+
+                    <!-- Quick bet buttons -->
+                    <div class="grid grid-cols-4 gap-2 mt-4">
+                        <button onclick="quickBet(0.5)" class="py-3 text-base font-medium bg-[#1f2937] hover:bg-[#27344a] rounded-2xl transition">½</button>
+                        <button onclick="quickBet(2)" class="py-3 text-base font-medium bg-[#1f2937] hover:bg-[#27344a] rounded-2xl transition">2×</button>
+                        <button onclick="quickBet(5)" class="py-3 text-base font-medium bg-[#1f2937] hover:bg-[#27344a] rounded-2xl transition">5×</button>
+                        <button onclick="quickBet(10)" class="py-3 text-base font-medium bg-[#1f2937] hover:bg-[#27344a] rounded-2xl transition">10×</button>
+                    </div>
+                </div>
+
+                <!-- Win Chance & Payout -->
+                <div class="chance-payout-block mt-auto pt-8 space-y-6">
+                    <div>
+                        <div class="flex justify-between text-sm text-gray-400 mb-2">
+                            <span>Chance de Ganhar</span>
+                            <span id="win-chance-display" class="font-mono text-white text-lg">50.00%</span>
+                        </div>
+                        <div class="h-2 bg-[#1f2937] rounded-3xl overflow-hidden">
+                            <div id="chance-bar" class="h-2 bg-[#00ff9d] rounded-3xl transition-all" style="width: 50%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-sm text-gray-400 mb-2">
+                            <span>Lucro se ganhar</span>
+                            <span id="payout-display" class="font-mono text-[#00ff9d] text-xl">R$ 9,80</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BIG ROLL BUTTON - maior e mais fácil de tocar no celular -->
+                <div class="roll-action-block mt-8 mb-6">
+                    <button onclick="rollDice()" 
+                            id="roll-button"
+                            class="mobile-roll-btn w-full bg-[#00ff9d] hover:bg-[#00cc7a] active:scale-95 transition-all text-[#0a0f1c] text-3xl font-bold py-7 rounded-3xl shadow-lg shadow-[#00ff9d]/30 flex items-center justify-center gap-3">
+                        <span>ROLL</span>
+                        <span class="text-4xl">🎲</span>
+                    </button>
+                    <p id="roll-status" class="text-center text-xs text-gray-400 mt-3 h-4"></p>
+                </div>
+            </div>
+
+            <!-- Auto Mode Content -->
+            <div id="auto-content" class="hidden px-4 lg:px-6 pt-6 flex-1">
+                <div class="bg-[#1f2937] rounded-3xl p-6 space-y-6">
+                    <div>
+                        <div class="text-sm text-gray-400 mb-2">Quantidade de rolls</div>
+                        <input id="auto-count" type="number" value="10" min="1" max="100" 
+                               class="w-full bg-[#0a0f1c] rounded-2xl px-5 py-4 text-2xl font-mono outline-none">
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-400 mb-2">Delay entre rolls (ms)</div>
+                        <input id="auto-delay" type="number" value="800" min="300" max="3000" step="100"
+                               class="w-full bg-[#0a0f1c] rounded-2xl px-5 py-4 text-2xl font-mono outline-none">
+                    </div>
+                    <button onclick="startAutoRoll()" 
+                            id="auto-start-btn"
+                            class="w-full py-6 bg-amber-400 hover:bg-amber-300 text-[#0a0f1c] font-bold rounded-3xl text-xl flex items-center justify-center gap-2">
+                        <span id="auto-text">INICIAR AUTO ROLL</span>
+                    </button>
+                    <button onclick="stopAutoRoll()" 
+                            class="w-full py-4 text-red-400 text-sm font-medium hover:text-red-300">PARAR</button>
+                </div>
+            </div>
+
+            <!-- Balance (sempre visível) -->
+            <div class="mt-auto border-t border-[#1f2937] p-4 lg:p-6">
+                <div class="flex justify-between items-center text-sm gap-3">
+                    <span class="text-gray-400">Seu saldo</span>
+                    <span id="balance-display" class="font-mono text-xl text-right">R$ 0,00</span>
+                </div>
+                <div onclick="resetBalance()" class="text-[#00b8ff] text-xs cursor-pointer hover:underline mt-2">Definir saldo teste em R$ 100,00</div>
+            </div>
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="main-panel flex-1 flex flex-col min-h-[360px] lg:min-h-[520px] main-panel-glow border border-[#1f2937] rounded-[18px] overflow-hidden lg:order-2 order-1">
+
+            <div class="result-stage flex-1 flex flex-col items-center justify-center px-4 lg:px-10 py-6 lg:py-8 relative">
+                <div id="result-container" class="w-full max-w-xl text-center">
+                    <div id="roll-number" class="result-number text-[56px] lg:text-[108px] font-mono font-bold leading-none mb-3 text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-300">
+                        00.00
+                    </div>
+                    
+                    <div id="result-text" class="text-xl lg:text-4xl font-bold mb-2 h-10 lg:h-14 flex items-center justify-center"></div>
+                    
+                    <div id="profit-text" class="text-lg lg:text-3xl font-medium h-8 lg:h-12"></div>
+                </div>
+
+                <div id="placeholder" class="placeholder-block text-center mt-4">
+                    <div class="placeholder-icon mx-auto w-16 h-16 lg:w-24 lg:h-24 bg-[#1f2937]/50 rounded-3xl flex items-center justify-center text-4xl lg:text-6xl mb-4 border border-dashed border-gray-600">
+                        🎲
+                    </div>
+                    <p class="text-gray-400 text-sm lg:text-lg">Arraste o controle e toque em ROLL</p>
+                    <p class="text-[#00b8ff] text-xs lg:text-sm mt-2">0.00 - 99.99 • House Edge 1%</p>
+                </div>
+            </div>
+
+            <div class="slider-section px-4 lg:px-10 pb-5 lg:pb-8">
+                <div class="flex justify-between text-xs text-gray-400 font-medium mb-3 px-1">
+                    <div>0</div>
+                    <div>25</div>
+                    <div>50</div>
+                    <div>75</div>
+                    <div>100</div>
+                </div>
+                
+                <div class="slider-container">
+                    <div id="colored-track" class="track"></div>
+                    <input type="range" 
+                           id="target-slider"
+                           min="0.01" 
+                           max="99.99" 
+                           value="50" 
+                           step="0.01"
+                           oninput="updateUI()">
+                </div>
+
+                <div class="flex items-center gap-2 w-full mt-5">
+                    <button onclick="setMode('under')" 
+                            id="btn-under"
+                            class="flex-1 px-4 py-3 rounded-2xl text-sm lg:text-base font-semibold transition-all flex items-center justify-center gap-2">
+                        <span>ROLL UNDER</span>
+                    </button>
+                    <button onclick="setMode('over')" 
+                            id="btn-over"
+                            class="flex-1 px-4 py-3 rounded-2xl text-sm lg:text-base font-semibold transition-all flex items-center justify-center gap-2">
+                        <span>ROLL OVER</span>
+                    </button>
+                </div>
+
+                <div class="slider-meta grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                    <div class="bg-[#132130] border border-[#203246] rounded-2xl px-4 py-3">
+                        <div class="text-[11px] uppercase tracking-widest text-gray-400">Alvo</div>
+                        <div id="target-label" class="text-3xl font-semibold text-white font-mono">50.00</div>
+                        <div id="mode-label" class="text-[#00b8ff] text-xs mt-1">ROLL UNDER</div>
+                    </div>
+                    <div class="bg-[#132130] border border-[#203246] rounded-2xl px-4 py-3 text-left md:text-right">
+                        <div class="text-[11px] uppercase tracking-widest text-gray-400">Multiplicador</div>
+                        <div id="multiplier-main" class="text-3xl font-bold text-[#00ff9d]">1.9800x</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History - scroll horizontal -->
+            <div class="history-section border-t border-[#1f2937] bg-[#0a0f1c] px-4 lg:px-10 py-4">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="uppercase text-xs tracking-widest text-gray-400">Últimos rolls</span>
+                    <button onclick="clearHistory()" class="text-xs text-gray-400 hover:text-white">Limpar</button>
+                </div>
+                <div id="history" class="history-strip flex gap-4 overflow-x-auto pb-2 snap-x">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'casinoBalance';
+        const HOUSE_EDGE = 0.01;
+
+        let balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+        let currentMode = 'under';
+        let isAutoRunning = false;
+        let autoTimeout = null;
+        let autoRemaining = 0;
+        let history = [];
+
+        function parseBet(value) {
+            return parseFloat(String(value).replace(',', '.')) || 0;
+        }
+
+        function formatMoney(value) {
+            return 'R$ ' + Number(value).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function saveBalance() {
+            localStorage.setItem(STORAGE_KEY, String(balance));
+        }
+
+        function updateBalance() {
+            document.getElementById('balance-display').textContent = formatMoney(balance);
+        }
+
+        function getCurrentBet() {
+            return parseBet(document.getElementById('bet-input').value);
+        }
+
+        function getWinChance(target) {
+            return currentMode === 'under' ? target : (100 - target);
+        }
+
+        function getMultiplier(winChance) {
+            return winChance > 0 ? (100 / winChance) * (1 - HOUSE_EDGE) : 0;
+        }
+
+        function updateUI() {
+            const slider = document.getElementById('target-slider');
+            const target = parseFloat(slider.value);
+            const winChance = getWinChance(target);
+            const multiplier = getMultiplier(winChance);
+            const bet = getCurrentBet();
+            const profitOnWin = Math.max(0, bet * multiplier - bet);
+
+            const track = document.getElementById('colored-track');
+            if (currentMode === 'under') {
+                track.style.background = `linear-gradient(to right, #10b981 ${target}%, #ef4444 ${target}%)`;
+            } else {
+                track.style.background = `linear-gradient(to right, #ef4444 ${target}%, #10b981 ${target}%)`;
+            }
+
+            document.getElementById('win-chance-display').textContent = winChance.toFixed(2) + '%';
+            document.getElementById('payout-display').textContent = formatMoney(profitOnWin);
+            document.getElementById('multiplier-main').textContent = multiplier.toFixed(4) + 'x';
+            document.getElementById('target-label').textContent = target.toFixed(2);
+            document.getElementById('mode-label').innerHTML = currentMode === 'under'
+                ? `<span class="text-emerald-400">ROLL UNDER</span>`
+                : `<span class="text-[#00b8ff]">ROLL OVER</span>`;
+
+            document.getElementById('chance-bar').style.width = winChance + '%';
+
+            const btnUnder = document.getElementById('btn-under');
+            const btnOver = document.getElementById('btn-over');
+
+            btnUnder.className = 'flex-1 lg:flex-none px-6 py-3 rounded-3xl text-base font-semibold transition-all flex items-center justify-center gap-2';
+            btnOver.className = 'flex-1 lg:flex-none px-6 py-3 rounded-3xl text-base font-semibold transition-all flex items-center justify-center gap-2';
+
+            if (currentMode === 'under') {
+                btnUnder.classList.add('bg-emerald-500', 'text-white', 'shadow-lg');
+                btnOver.classList.add('bg-[#1f2937]', 'text-white');
+            } else {
+                btnOver.classList.add('bg-[#00b8ff]', 'text-white', 'shadow-lg');
+                btnUnder.classList.add('bg-[#1f2937]', 'text-white');
+            }
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            updateUI();
+        }
+
+        function setTab(tab) {
+            const tabManual = document.getElementById('tab-manual');
+            const tabAuto = document.getElementById('tab-auto');
+
+            if (tab === 0) {
+                document.getElementById('manual-content').classList.remove('hidden');
+                document.getElementById('auto-content').classList.add('hidden');
+                tabManual.classList.add('active-tab', 'bg-[#1f2937]', 'shadow-inner');
+                tabAuto.classList.remove('active-tab', 'bg-[#1f2937]', 'shadow-inner');
+            } else {
+                document.getElementById('manual-content').classList.add('hidden');
+                document.getElementById('auto-content').classList.remove('hidden');
+                tabAuto.classList.add('active-tab', 'bg-[#1f2937]', 'shadow-inner');
+                tabManual.classList.remove('active-tab', 'bg-[#1f2937]', 'shadow-inner');
+            }
+        }
+
+        function formatBet(input) {
+            let value = parseBet(input.value);
+            if (value < 0) value = 0;
+            input.value = value.toFixed(2);
+            updateUI();
+        }
+
+        function quickBet(multiplier) {
+            const betInput = document.getElementById('bet-input');
+            const currentBet = getCurrentBet() || 1;
+            betInput.value = (currentBet * multiplier).toFixed(2);
+            updateUI();
+        }
+
+        function setStatus(message, colorClass = 'text-gray-400') {
+            const status = document.getElementById('roll-status');
+            status.innerHTML = `<span class="${colorClass}">${message}</span>`;
+        }
+
+        function rollDice() {
+            const betInput = document.getElementById('bet-input');
+            const bet = parseBet(betInput.value);
+
+            if (bet <= 0) {
+                setStatus('Aposta deve ser maior que zero', 'text-red-400');
+                stopAutoRoll();
+                return;
+            }
+
+            if (bet > balance) {
+                setStatus('Saldo insuficiente', 'text-red-400');
+                stopAutoRoll();
+                return;
+            }
+
+            balance -= bet;
+            saveBalance();
+            updateBalance();
+
+            const rollBtn = document.getElementById('roll-button');
+            rollBtn.disabled = true;
+            rollBtn.innerHTML = `<span class="animate-pulse">ROLLING...</span>`;
+
+            document.getElementById('placeholder').classList.add('hidden');
+
+            const roll = Number((Math.floor(Math.random() * 10000) / 100).toFixed(2));
+            const target = parseFloat(document.getElementById('target-slider').value);
+            const winChance = getWinChance(target);
+            const multiplier = getMultiplier(winChance);
+            const isWin = currentMode === 'under' ? roll < target : roll >= target;
+            const payout = isWin ? bet * multiplier : 0;
+            const netProfit = isWin ? payout - bet : -bet;
+
+            if (isWin) {
+                balance += payout;
+                saveBalance();
+            }
+
+            document.getElementById('roll-number').textContent = roll.toFixed(2);
+            document.getElementById('roll-number').className = isWin
+                ? 'result-number text-[78px] lg:text-[120px] font-mono font-bold leading-none mb-4 roll-result text-emerald-400'
+                : 'result-number text-[78px] lg:text-[120px] font-mono font-bold leading-none mb-4 roll-result text-red-400';
+
+            document.getElementById('result-text').innerHTML = isWin
+                ? `<span class="text-emerald-400">🎉 VOCÊ GANHOU!</span>`
+                : `<span class="text-red-400">😢 VOCÊ PERDEU</span>`;
+
+            const profitEl = document.getElementById('profit-text');
+            if (isWin) {
+                profitEl.innerHTML = `+${formatMoney(netProfit)} <span class="text-emerald-400 text-xl">(${multiplier.toFixed(2)}x)</span>`;
+                profitEl.className = 'text-3xl lg:text-4xl font-medium h-12 text-emerald-400';
+                setStatus(`Roll ${currentMode === 'under' ? 'under' : 'over'} ${target.toFixed(2)} acertou`, 'text-emerald-400');
+            } else {
+                profitEl.innerHTML = `-${formatMoney(bet)}`;
+                profitEl.className = 'text-3xl lg:text-4xl font-medium h-12 text-red-400';
+                setStatus(`Saiu ${roll.toFixed(2)} • tentativa perdida`, 'text-red-400');
+            }
+
+            addToHistory(roll, target, currentMode, isWin, bet, netProfit);
+            updateBalance();
+
+            if (isAutoRunning) {
+                autoRemaining -= 1;
+            }
+
+            setTimeout(() => {
+                rollBtn.disabled = false;
+                rollBtn.innerHTML = `<span>ROLL</span><span class="text-4xl">🎲</span>`;
+
+                if (isAutoRunning) {
+                    if (autoRemaining > 0) {
+                        autoTimeout = setTimeout(() => {
+                            if (isAutoRunning) rollDice();
+                        }, parseInt(document.getElementById('auto-delay').value, 10) || 800);
+                    } else {
+                        stopAutoRoll();
+                        setStatus('Auto roll finalizado', 'text-[#00b8ff]');
+                    }
+                }
+            }, 1200);
+        }
+
+        function addToHistory(roll, target, mode, isWin, bet, netProfit) {
+            history.unshift({ roll, target: target.toFixed(2), mode, win: isWin, bet, netProfit });
+            if (history.length > 8) history.pop();
+
+            const container = document.getElementById('history');
+            container.innerHTML = '';
+
+            history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item flex-shrink-0 bg-[#1f2937] rounded-2xl px-4 py-3 w-36 text-center snap-center';
+                div.innerHTML = `
+                    <div class="text-xs font-mono opacity-70">${Number(item.roll).toFixed(2)}</div>
+                    <div class="text-sm mt-1 flex justify-center items-center gap-1">
+                        ${item.mode === 'under' ? '↓' : '↑'}
+                        <span class="font-semibold">${item.target}</span>
+                    </div>
+                    <div class="text-sm font-bold ${item.win ? 'text-emerald-400' : 'text-red-400'}">
+                        ${item.win ? '+' + formatMoney(item.netProfit) : '-' + formatMoney(item.bet)}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function clearHistory() {
+            history = [];
+            document.getElementById('history').innerHTML = '';
+        }
+
+        function startAutoRoll() {
+            if (isAutoRunning) return;
+            autoRemaining = Math.max(1, parseInt(document.getElementById('auto-count').value, 10) || 1);
+            isAutoRunning = true;
+            const btn = document.getElementById('auto-start-btn');
+            btn.innerHTML = `<span class="animate-pulse">RODANDO AUTO...</span>`;
+            btn.disabled = true;
+            setStatus(`Auto roll iniciado (${autoRemaining} jogadas)`, 'text-[#00b8ff]');
+            rollDice();
+        }
+
+        function stopAutoRoll() {
+            isAutoRunning = false;
+            autoRemaining = 0;
+            if (autoTimeout) clearTimeout(autoTimeout);
+            const btn = document.getElementById('auto-start-btn');
+            btn.innerHTML = `<span id="auto-text">INICIAR AUTO ROLL</span>`;
+            btn.disabled = false;
+        }
+
+        function resetBalance() {
+            if (confirm('Definir saldo teste em R$ 100,00?')) {
+                balance = 100;
+                saveBalance();
+                updateBalance();
+                setStatus('Saldo atualizado para R$ 100,00', 'text-[#00b8ff]');
+            }
+        }
+
+        window.addEventListener('storage', () => {
+            balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+            updateBalance();
+        });
+
+        window.onload = function() {
+            updateBalance();
+            setTab(0);
+            updateUI();
+            console.log('%c✅ Dice com lógica real de cassino carregado!', 'color:#00ff9d; font-size:14px');
+        };
+    </script>
+</body>
+</html>

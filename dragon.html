@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="icon.png">
+<title>Dragon Tower</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#08131d;
+  --panel:#203746;
+  --panel-2:#162733;
+  --panel-3:#0d1924;
+  --tile:#203947;
+  --tile-2:#1a3140;
+  --red:#ff2d5f;
+  --red-dark:#cf234c;
+  --egg:#f1ead2;
+  --egg-border:#d2c7a0;
+  --text-soft:rgba(255,255,255,.72);
+}
+
+body{
+  min-height:100vh;
+  background:linear-gradient(180deg,#06111b 0%,#0b1824 100%);
+  color:#fff;
+  font-family:Arial,sans-serif;
+  padding:14px;
+}
+
+.page{
+  width:min(1200px,100%);
+  margin:0 auto;
+}
+
+.game-header-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.page-back{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:#0f1a27;
+  color:#fff;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  flex-shrink:0;
+}
+.game-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:var(--red);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  flex-shrink:0;
+}
+.game-brand strong{
+  display:block;
+  font-size:18px;
+}
+.game-brand small{
+  display:block;
+  color:rgba(255,255,255,.72);
+  font-size:11px;
+  margin-top:2px;
+}
+.page-live{
+  padding:8px 12px;
+  border-radius:999px;
+  background:#0f1a27;
+  border:1px solid rgba(255,255,255,.12);
+  font-size:12px;
+  font-weight:800;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+
+.hub-back{
+  text-decoration:none;
+  padding:10px 14px;
+  border-radius:10px;
+  background:linear-gradient(180deg,#4f6df5,#3d57c4);
+  color:#fff;
+  font-weight:800;
+}
+
+.brand{
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:.5px;
+}
+
+.balance-chip{
+  padding:10px 14px;
+  border-radius:10px;
+  background:#0f1a27;
+  border:1px solid rgba(255,255,255,.12);
+  font-size:16px;
+  font-weight:800;
+}
+
+.layout{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.control-panel{
+  background:linear-gradient(180deg,#233c4b 0%,#203746 100%);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  width:min(520px,100%);
+  margin:0 auto;
+  order:2;
+}
+
+.mode-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.mode-btn{
+  border:none;
+  border-radius:999px;
+  background:#142431;
+  color:#fff;
+  padding:10px;
+  font-weight:800;
+  cursor:pointer;
+}
+.mode-btn.active{
+  background:rgba(255,255,255,.1);
+}
+
+.field-label{
+  font-size:13px;
+  color:var(--text-soft);
+  margin-bottom:6px;
+}
+
+.amount-box{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:8px;
+  align-items:center;
+}
+
+.amount-input,
+.difficulty-select{
+  width:100%;
+  border:none;
+  border-radius:10px;
+  background:#0d1924;
+  border:1px solid rgba(255,255,255,.08);
+  color:#fff;
+  padding:12px;
+  font-size:20px;
+  font-weight:800;
+  outline:none;
+}
+.difficulty-select{
+  font-size:16px;
+}
+
+.mini-btn{
+  border:none;
+  border-radius:10px;
+  background:#152734;
+  color:#fff;
+  padding:12px 10px;
+  font-weight:800;
+  cursor:pointer;
+  min-width:48px;
+}
+
+.stats-box{
+  background:#142430;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:12px;
+}
+.stat-line{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  font-size:14px;
+  color:var(--text-soft);
+}
+.stat-line strong{
+  color:#fff;
+  font-size:16px;
+}
+.stat-line + .stat-line{ margin-top:8px; }
+
+.play-btn,
+.cashout-btn{
+  border:none;
+  border-radius:10px;
+  padding:14px;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+}
+.play-btn{
+  background:linear-gradient(180deg,var(--red) 0%,var(--red-dark) 100%);
+  color:#fff;
+}
+.cashout-btn{
+  background:#142430;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.08);
+}
+.play-btn:disabled,
+.cashout-btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.status-box{
+  min-height:42px;
+  color:var(--text-soft);
+  font-size:13px;
+  line-height:1.4;
+}
+.status-box.active{ color:#ffd8a8; }
+.status-box.win{ color:#b7ffd1; }
+.status-box.lose{ color:#ffb3b3; }
+
+.board-panel{
+  position:relative;
+  order:1;
+  background:
+    radial-gradient(circle at center, rgba(20,70,105,.15), transparent 55%),
+    linear-gradient(180deg,#07131e 0%,#04101a 100%);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;
+  padding:16px;
+  overflow:hidden;
+  min-height:640px;
+}
+.board-panel::before,
+.board-panel::after{
+  content:'';
+  position:absolute;
+  background:rgba(40,68,92,.22);
+  filter:blur(1px);
+}
+.board-panel::before{
+  inset:28px auto auto 28px;
+  width:220px;
+  height:220px;
+  clip-path:polygon(10% 0, 100% 18%, 72% 56%, 0 44%);
+}
+.board-panel::after{
+  right:24px;
+  bottom:24px;
+  width:180px;
+  height:180px;
+  clip-path:polygon(20% 0, 100% 18%, 74% 100%, 0 72%);
+}
+
+.dragon-top{
+  position:relative;
+  z-index:2;
+  text-align:center;
+  margin-bottom:10px;
+}
+.dragon-top .dragon-title{
+  margin-top:4px;
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.tower-frame{
+  position:relative;
+  z-index:2;
+  width:min(520px,100%);
+  margin:0 auto;
+  border:8px solid #6e7d92;
+  border-top-width:16px;
+  border-bottom-width:10px;
+  border-radius:10px;
+  background:linear-gradient(180deg,#2e4152 0%, #243848 100%);
+  padding:12px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+}
+
+.board{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+
+.tower-tile{
+  border:none;
+  min-height:48px;
+  border-radius:8px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.03) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.03) 50%, rgba(255,255,255,.03) 75%, transparent 75%, transparent 100%),
+    linear-gradient(180deg,var(--tile),var(--tile-2));
+  background-size:18px 18px, auto;
+  border:1px solid rgba(255,255,255,.05);
+  color:#fff;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.tower-tile.active{
+  box-shadow:0 0 0 2px rgba(255,45,95,.45);
+}
+.tower-tile.active:hover{
+  transform:translateY(-1px) scale(1.02);
+  filter:brightness(1.06);
+}
+.tower-tile:disabled{ cursor:default; }
+.tower-tile.safe{
+  background:linear-gradient(180deg,#fff7e5 0%,var(--egg) 100%);
+  border-color:var(--egg-border);
+  color:#5b4a27;
+}
+.tower-tile.safe.hint{
+  opacity:.72;
+}
+.tower-tile.dragon{
+  background:linear-gradient(180deg,#ff5b72 0%,var(--red) 100%);
+  border-color:rgba(255,255,255,.16);
+}
+.tile-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  font-size:28px;
+}
+
+.help-line{
+  margin-top:12px;
+  text-align:center;
+  font-size:13px;
+  color:var(--text-soft);
+}
+
+@media (max-width:960px){
+  .layout{ grid-template-columns:1fr; }
+  .board-panel{ min-height:auto; }
+}
+
+@media (max-width:560px){
+  .amount-box{ grid-template-columns:1fr 56px 56px; }
+  .tower-tile{ min-height:44px; }
+  .dragon-top .dragon-emoji{ font-size:56px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="game-header-left">
+      <a class="page-back" href="hub.html" aria-label="Voltar ao início">←</a>
+      <div class="game-icon">🐉</div>
+      <div class="game-brand"><strong>Dragon Tower</strong><small>plinio.bet</small></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div class="page-live">AO VIVO</div>
+      <div class="balance-chip" id="balanceChip">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="control-panel">
+      <div class="mode-tabs">
+        <button class="mode-btn active" type="button">Manual</button>
+        <button class="mode-btn" type="button">Auto</button>
+      </div>
+
+      <div>
+        <div class="field-label">Amount</div>
+        <div class="amount-box">
+          <input class="amount-input" id="betInput" type="number" value="10" min="1" step="1">
+          <button class="mini-btn" type="button" onclick="halfBet()">½</button>
+          <button class="mini-btn" type="button" onclick="doubleBet()">2×</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-label">Difficulty</div>
+        <select class="difficulty-select" id="difficultySelect">
+          <option>Easy</option>
+          <option selected>Medium</option>
+          <option>Hard</option>
+          <option>Expert</option>
+          <option>Master</option>
+        </select>
+      </div>
+
+      <div class="stats-box">
+        <div class="stat-line"><span>Multiplicador</span><strong id="multiplierVal">1.00x</strong></div>
+        <div class="stat-line"><span>Chance</span><strong id="chanceVal">66.67%</strong></div>
+        <div class="stat-line"><span>Casas</span><strong id="safeVal">2 ovos • 1 dragão</strong></div>
+        <div class="stat-line"><span>Retirada</span><strong id="cashoutVal">R$ 0,00</strong></div>
+      </div>
+
+      <button class="play-btn" id="playBtn" type="button">Play</button>
+      <button class="cashout-btn" id="cashoutBtn" type="button" disabled>Retirar</button>
+
+      <div class="status-box" id="statusBox">Escolha o valor, clique em <strong>Play</strong> e encontre o ovo em cada andar da torre.</div>
+    </aside>
+
+    <section class="board-panel">
+      <div class="dragon-top">
+        <div class="dragon-title">Suba a torre sem acordar o dragão</div>
+      </div>
+
+      <div class="tower-frame">
+        <div class="board" id="board"></div>
+      </div>
+
+      <div class="help-line">Encontre o <strong>ovo</strong> em cada linha para continuar subindo.</div>
+    </section>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'casinoBalance';
+const ROWS = 9;
+const COLS = 3;
+const HOUSE_EDGE = 0.04;
+const DIFFICULTY_CONFIG = {
+  Easy:   { safeTiles: 2, label: '2 ovos • 1 dragão' },
+  Medium: { safeTiles: 2, label: '2 ovos • 1 dragão' },
+  Hard:   { safeTiles: 1, label: '1 ovo • 2 dragões' },
+  Expert: { safeTiles: 1, label: '1 ovo • 2 dragões' },
+  Master: { safeTiles: 1, label: '1 ovo • 2 dragões' },
+};
+
+let balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+let betAmount = 10;
+let gameActive = false;
+let currentRow = ROWS - 1;
+let revealedRows = 0;
+let safeRows = [];
+
+const board = document.getElementById('board');
+const balanceChip = document.getElementById('balanceChip');
+const betInput = document.getElementById('betInput');
+const difficultySelect = document.getElementById('difficultySelect');
+const multiplierVal = document.getElementById('multiplierVal');
+const chanceVal = document.getElementById('chanceVal');
+const safeVal = document.getElementById('safeVal');
+const cashoutVal = document.getElementById('cashoutVal');
+const playBtn = document.getElementById('playBtn');
+const cashoutBtn = document.getElementById('cashoutBtn');
+const statusBox = document.getElementById('statusBox');
+
+function fmtMoney(v){
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function updateBalance(delta = 0){
+  balance += delta;
+  localStorage.setItem(STORAGE_KEY, String(balance));
+  balanceChip.textContent = fmtMoney(balance);
+}
+
+function setStatus(message, tone = ''){
+  statusBox.className = 'status-box' + (tone ? ' ' + tone : '');
+  statusBox.innerHTML = message;
+}
+
+function getDifficultyConfig(){
+  return DIFFICULTY_CONFIG[difficultySelect.value] || DIFFICULTY_CONFIG.Medium;
+}
+
+function getChance(){
+  const { safeTiles } = getDifficultyConfig();
+  return (safeTiles / COLS) * 100;
+}
+
+function getStepMultiplier(){
+  const { safeTiles } = getDifficultyConfig();
+  return (COLS / safeTiles) * (1 - HOUSE_EDGE);
+}
+
+function getMultiplier(){
+  let multiplier = 1;
+  for(let i = 0; i < revealedRows; i++){
+    multiplier *= getStepMultiplier();
+  }
+  return Number(multiplier.toFixed(2));
+}
+
+function renderStats(){
+  const currentBet = gameActive ? betAmount : Math.max(parseFloat(betInput.value) || 0, 0);
+  const multiplier = getMultiplier();
+  const { label } = getDifficultyConfig();
+  chanceVal.textContent = `${getChance().toFixed(2)}%`;
+  safeVal.textContent = label;
+  multiplierVal.textContent = `${multiplier.toFixed(2)}x`;
+  cashoutVal.textContent = revealedRows > 0 ? fmtMoney(currentBet * multiplier) : 'R$ 0,00';
+  cashoutBtn.textContent = revealedRows > 0 ? `Retirar ${fmtMoney(currentBet * multiplier)}` : 'Retirar';
+  balanceChip.textContent = fmtMoney(balance);
+}
+
+function halfBet(){
+  const value = Math.max(1, Math.floor((parseFloat(betInput.value) || 0) / 2));
+  betInput.value = value;
+  if(!gameActive) renderStats();
+}
+
+function doubleBet(){
+  const value = Math.max(1, Math.floor((parseFloat(betInput.value) || 0) * 2));
+  betInput.value = value;
+  if(!gameActive) renderStats();
+}
+
+function createPath(){
+  const { safeTiles } = getDifficultyConfig();
+  safeRows = Array.from({ length: ROWS }, () => {
+    const shuffled = Array.from({ length: COLS }, (_, i) => i).sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, safeTiles);
+  });
+}
+
+function getTile(row, col){
+  return board.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+}
+
+function buildBoard(){
+  board.innerHTML = '';
+  for(let row = 0; row < ROWS; row++){
+    for(let col = 0; col < COLS; col++){
+      const tile = document.createElement('button');
+      tile.className = 'tower-tile';
+      tile.type = 'button';
+      tile.dataset.row = row;
+      tile.dataset.col = col;
+      tile.innerHTML = '<span class="tile-icon"></span>';
+      tile.addEventListener('click', () => chooseTile(row, col));
+      board.appendChild(tile);
+    }
+  }
+  refreshBoard();
+}
+
+function refreshBoard(){
+  board.querySelectorAll('.tower-tile').forEach(tile => {
+    const row = Number(tile.dataset.row);
+    if(tile.classList.contains('safe') || tile.classList.contains('dragon')) return;
+    const active = gameActive && row === currentRow;
+    tile.disabled = !active;
+    tile.classList.toggle('active', active);
+  });
+}
+
+function revealEgg(row, col, hint = false){
+  const tile = getTile(row, col);
+  if(!tile) return;
+  tile.disabled = true;
+  tile.classList.remove('active');
+  tile.classList.add('safe');
+  if(hint) tile.classList.add('hint');
+  tile.querySelector('.tile-icon').textContent = '🥚';
+}
+
+function revealDragon(row, col){
+  const tile = getTile(row, col);
+  if(!tile) return;
+  tile.disabled = true;
+  tile.classList.remove('active');
+  tile.classList.add('dragon');
+  tile.querySelector('.tile-icon').textContent = '🐉';
+}
+
+function revealPathHints(triggerRow){
+  for(let row = 0; row < ROWS; row++){
+    const safeCols = safeRows[row] || [];
+    safeCols.forEach((safeCol) => {
+      if(row !== triggerRow || safeCols.length > 1){
+        const tile = getTile(row, safeCol);
+        if(tile && !tile.classList.contains('safe')) revealEgg(row, safeCol, true);
+      }
+    });
+  }
+}
+
+function startGame(){
+  if(gameActive) return;
+
+  betAmount = parseFloat(betInput.value);
+  if(isNaN(betAmount) || betAmount <= 0){
+    setStatus('Digite um valor de aposta válido.', 'lose');
+    return;
+  }
+  if(betAmount > balance){
+    setStatus('Saldo insuficiente. Volte ao hub para depositar.', 'lose');
+    return;
+  }
+
+  updateBalance(-betAmount);
+  gameActive = true;
+  currentRow = ROWS - 1;
+  revealedRows = 0;
+  createPath();
+  buildBoard();
+  renderStats();
+
+  betInput.disabled = true;
+  difficultySelect.disabled = true;
+  playBtn.disabled = true;
+  cashoutBtn.disabled = true;
+  const { safeTiles } = getDifficultyConfig();
+  setStatus(`Rodada iniciada. Encontre ${safeTiles === 1 ? 'o ovo seguro' : 'um dos ovos seguros'} na base da torre.`, 'active');
+}
+
+function finishRound(){
+  gameActive = false;
+  betInput.disabled = false;
+  difficultySelect.disabled = false;
+  playBtn.disabled = false;
+  cashoutBtn.disabled = true;
+  refreshBoard();
+  renderStats();
+}
+
+function chooseTile(row, col){
+  if(!gameActive || row !== currentRow) return;
+
+  const safeCols = safeRows[row] || [];
+  if(safeCols.includes(col)){
+    revealEgg(row, col);
+    revealedRows++;
+    currentRow--;
+    cashoutBtn.disabled = false;
+    renderStats();
+
+    if(currentRow < 0){
+      cashOut(true);
+      return;
+    }
+
+    setStatus(`Boa! Você subiu ${revealedRows} nível(is). Escolha a próxima casa segura.`, 'active');
+    refreshBoard();
+    return;
+  }
+
+  revealDragon(row, col);
+  revealPathHints(row);
+  setStatus('O dragão apareceu. Rodada perdida.', 'lose');
+  finishRound();
+}
+
+function cashOut(auto = false){
+  if(!gameActive || revealedRows <= 0) return;
+
+  const multiplier = getMultiplier();
+  const payout = Number((betAmount * multiplier).toFixed(2));
+  updateBalance(payout);
+  setStatus(auto ? `Torre completada! Você retirou ${fmtMoney(payout)}.` : `Retirada feita em ${multiplier.toFixed(2)}x.`, 'win');
+  finishRound();
+}
+
+playBtn.addEventListener('click', startGame);
+cashoutBtn.addEventListener('click', () => cashOut(false));
+betInput.addEventListener('input', renderStats);
+difficultySelect.addEventListener('change', renderStats);
+window.addEventListener('storage', () => {
+  balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+  renderStats();
+});
+
+buildBoard();
+renderStats();
+if(balance <= 0){
+  setStatus('Volte ao hub para depositar saldo antes de jogar.', 'active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="icon.png">
+<title>Aviator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#111318;
+  --panel:#1a1d24;
+  --panel-2:#12151b;
+  --panel-3:#0d1015;
+  --green:#2bc84b;
+  --orange:#ff8b1f;
+  --red:#ff3b30;
+  --text-soft:rgba(255,255,255,.72);
+}
+
+body{
+  background:#0f1115;
+  color:#fff;
+  font-family:Arial,sans-serif;
+  min-height:100vh;
+  padding:14px;
+}
+
+.hub-back{
+  text-decoration:none;
+  border:none;
+  border-radius:999px;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  padding:7px 12px;
+  font-size:12px;
+  background:linear-gradient(180deg,#4f6df5,#3d57c4);
+}
+
+.app{
+  width:min(1100px,100%);
+  margin:0 auto;
+}
+
+.game-header-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.page-back{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:#1b1f27;
+  color:#fff;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  flex-shrink:0;
+}
+.game-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:#ff3b30;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  flex-shrink:0;
+}
+.game-brand strong{
+  display:block;
+  font-size:18px;
+  color:#fff;
+}
+.game-brand small{
+  display:block;
+  color:rgba(255,255,255,.68);
+  font-size:11px;
+  margin-top:2px;
+}
+.page-live{
+  padding:7px 12px;
+  border-radius:999px;
+  background:#1b1f27;
+  border:1px solid rgba(255,255,255,.08);
+  font-size:12px;
+  font-weight:700;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+.brand{
+  color:#ff4d4f;
+  font-weight:800;
+  letter-spacing:.5px;
+}
+
+.right-top{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.balance-chip,
+.hist-pill,
+.small-btn{
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.balance-chip{
+  padding:7px 12px;
+  background:#1b1f27;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.small-btn{
+  border:none;
+  color:#fff;
+  padding:7px 12px;
+  cursor:pointer;
+}
+.deposit-btn{ background:linear-gradient(180deg,#f7b733,#d68d0f); }
+.switch-btn{ background:linear-gradient(180deg,#4f6df5,#3d57c4); }
+
+.layout{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+
+.history-row{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.hist-pill{
+  padding:6px 10px;
+  background:#1b1f27;
+  color:#93a4bd;
+}
+.hist-pill.low{ color:#7cc6ff; }
+.hist-pill.mid{ color:#8ce99a; }
+.hist-pill.high{ color:#d0a6ff; }
+.hist-pill.mega{ color:#ffbe5c; }
+
+.game-panel{
+  background:#171a21;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.graph-area{
+  position:relative;
+  height:390px;
+  background:
+    radial-gradient(circle at center, rgba(255,255,255,.03), transparent 55%),
+    repeating-conic-gradient(from 180deg at 0% 100%, rgba(255,255,255,.035) 0deg, rgba(255,255,255,0) 11deg, rgba(255,255,255,0) 22deg),
+    linear-gradient(180deg,#111317 0%, #0d0f13 100%);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  overflow:hidden;
+}
+
+.graph-grid{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size:56px 56px;
+  opacity:.35;
+}
+
+.graph-svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:1;
+}
+
+#trailGlow{ filter:drop-shadow(0 0 10px rgba(255,59,48,.32)); }
+
+.multiplier-wrap{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:2;
+  pointer-events:none;
+}
+
+#multiplier{
+  font-size:62px;
+  font-weight:800;
+  letter-spacing:-1px;
+  color:#fff;
+  text-shadow:0 0 12px rgba(255,255,255,.08);
+  transition:color .18s ease, text-shadow .18s ease;
+}
+#multiplier.crash{
+  color:#ff4d4f;
+  text-shadow:0 0 18px rgba(255,59,48,.35);
+}
+
+#roundText{
+  margin-top:8px;
+  color:var(--text-soft);
+  font-size:14px;
+}
+
+#plane{
+  position:absolute;
+  left:30px;
+  top:350px;
+  z-index:3;
+  width:74px;
+  height:74px;
+  transform:translate(-50%,-50%) rotate(-12deg);
+  transition:transform .08s linear, opacity .15s ease;
+  will-change:left,top,transform;
+}
+#plane img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  filter:drop-shadow(0 0 12px rgba(255,255,255,.14));
+  pointer-events:none;
+}
+
+#flashOverlay{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
+  z-index:4;
+  background:radial-gradient(circle, rgba(255,110,110,.28) 0%, rgba(255,59,48,.2) 35%, rgba(255,59,48,.42) 100%);
+}
+#flashOverlay.show{
+  animation:flashCrash .45s ease-out forwards;
+}
+
+.loss-popup{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(.82);
+  z-index:20;
+  min-width:220px;
+  padding:18px 24px;
+  border-radius:16px;
+  background:linear-gradient(180deg,#241214,#170c0d);
+  border:1px solid rgba(255,82,82,.38);
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+  text-align:center;
+  opacity:0;
+  pointer-events:none;
+}
+.loss-popup.show{
+  animation:lossPopupIn .28s ease forwards, lossPopupOut .35s ease 1.65s forwards;
+}
+.loss-title{
+  color:#ff8d8d;
+  font-size:13px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.loss-value{
+  margin-top:8px;
+  font-size:34px;
+  font-weight:800;
+  color:#fff;
+}
+.loss-sub{
+  margin-top:6px;
+  color:rgba(255,255,255,.68);
+  font-size:13px;
+}
+
+.crash-badge{
+  position:absolute;
+  right:16px;
+  top:16px;
+  background:rgba(255,59,48,.12);
+  border:1px solid rgba(255,59,48,.32);
+  color:#ff968d;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12px;
+  z-index:4;
+}
+
+.controls{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:14px;
+}
+
+.control-card{
+  background:#11141a;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;
+  padding:12px;
+}
+
+.cc-label{
+  color:rgba(255,255,255,.55);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:8px;
+}
+
+.bet-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+input{
+  width:100%;
+  background:#0c0f14;
+  border:1px solid rgba(255,255,255,.08);
+  color:#fff;
+  border-radius:8px;
+  padding:11px 12px;
+  font-size:18px;
+  outline:none;
+}
+
+.action-btn{
+  width:100%;
+  border:none;
+  border-radius:10px;
+  color:#fff;
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+  padding:12px 14px;
+  margin-top:10px;
+}
+
+#betBtn{ background:linear-gradient(180deg,#35d34d,#21a73c); }
+#cashBtn{ background:linear-gradient(180deg,#ff4d4f,#c81f25); }
+#cashBtn:disabled,
+#betBtn:disabled{ opacity:.45; cursor:not-allowed; }
+
+.cash-preview{
+  font-size:28px;
+  font-weight:800;
+  margin-top:2px;
+}
+
+.status-line{
+  padding:0 14px 14px;
+  color:var(--text-soft);
+  font-size:14px;
+}
+.status-line.active{ color:#ffe08a; }
+.status-line.win{ color:#a7f0b5; }
+.status-line.lose{ color:#ffaea8; }
+
+.graph-area.crashed{
+  box-shadow:inset 0 0 0 1px rgba(255,59,48,.18), inset 0 0 60px rgba(255,59,48,.08);
+}
+
+@keyframes flashCrash{
+  0%{opacity:0}
+  30%{opacity:1}
+  100%{opacity:0}
+}
+@keyframes lossPopupIn{
+  to{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+@keyframes lossPopupOut{
+  to{opacity:0;transform:translate(-50%,-54%) scale(.96)}
+}
+
+@media (max-width:760px){
+  .controls{ grid-template-columns:1fr; }
+  #multiplier{ font-size:48px; }
+  .graph-area{ height:330px; }
+}
+</style>
+</head>
+<body>
+<div class="loss-popup" id="lossPopup">
+  <div class="loss-title">Você perdeu</div>
+  <div class="loss-value" id="lossValue">R$ 0,00</div>
+  <div class="loss-sub">Aposta perdida no crash</div>
+</div>
+
+<div class="app">
+  <div class="topbar">
+    <div class="game-header-left">
+      <a class="page-back" href="hub.html" aria-label="Voltar ao início">←</a>
+      <div class="game-icon">✈</div>
+      <div class="game-brand"><strong>Aviator</strong><small>plinio.bet</small></div>
+    </div>
+    <div class="right-top">
+      <div class="page-live">AO VIVO</div>
+      <div class="balance-chip" id="balance">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="history-row" id="historyRow"></div>
+
+    <div class="game-panel">
+      <div class="graph-area" id="gameArea">
+        <div class="graph-grid"></div>
+        <svg class="graph-svg" viewBox="0 0 900 390" preserveAspectRatio="none">
+          <path id="fillArea" d="M30 350 L110 320 L110 350 Z" fill="rgba(255,59,48,.55)"></path>
+          <path id="trailGlow" d="M30 350 L110 320" stroke="rgba(255,59,48,.28)" stroke-width="10" fill="none" stroke-linecap="round"></path>
+          <path id="trailPath" d="M30 350 L110 320" stroke="#ff3b30" stroke-width="5" fill="none" stroke-linecap="round"></path>
+        </svg>
+        <div class="multiplier-wrap">
+          <div id="multiplier">1.00x</div>
+          <div id="roundText">Pronto para apostar</div>
+        </div>
+        <div class="crash-badge" id="crashBadge">Último crash: —</div>
+        <div id="flashOverlay"></div>
+        <div id="plane"><img src="aviator.png" alt="Avião"></div>
+      </div>
+
+      <div class="controls">
+        <div class="control-card">
+          <div class="cc-label">Sua aposta</div>
+          <div class="bet-row">
+            <input id="bet" type="number" value="10" min="1" step="1">
+          </div>
+          <button class="action-btn" id="betBtn">Apostar</button>
+        </div>
+
+        <div class="control-card">
+          <div class="cc-label">Retirada atual</div>
+          <div class="cash-preview" id="cashPreview">R$ 0,00</div>
+          <button class="action-btn" id="cashBtn" disabled>Retirar</button>
+        </div>
+      </div>
+
+      <div class="status-line" id="statusLine">Interface simplificada, sem a lista de cashouts das pessoas.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'casinoBalance';
+
+let balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+let playing = false;
+let activeBet = false;
+let cashedOut = false;
+let multiplier = 1;
+let crashPoint = 0;
+let betAmount = 0;
+let roundStart = 0;
+let animId = null;
+let autoRoundTimer = null;
+let countdownTicker = null;
+let historyValues = [];
+let audioCtx = null;
+
+const balanceEl = document.getElementById('balance');
+const betInput = document.getElementById('bet');
+const betBtn = document.getElementById('betBtn');
+const cashBtn = document.getElementById('cashBtn');
+const multiplierEl = document.getElementById('multiplier');
+const roundText = document.getElementById('roundText');
+const cashPreview = document.getElementById('cashPreview');
+const statusLine = document.getElementById('statusLine');
+const plane = document.getElementById('plane');
+const fillArea = document.getElementById('fillArea');
+const trailPath = document.getElementById('trailPath');
+const trailGlow = document.getElementById('trailGlow');
+const historyRow = document.getElementById('historyRow');
+const crashBadge = document.getElementById('crashBadge');
+const gameArea = document.getElementById('gameArea');
+const flashOverlay = document.getElementById('flashOverlay');
+const lossPopup = document.getElementById('lossPopup');
+const lossValue = document.getElementById('lossValue');
+
+function fmtMoney(v){
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function ensureAudio(){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  }catch(e){}
+}
+
+function playTakeoffSound(){
+  try{
+    ensureAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(520, audioCtx.currentTime + 0.35);
+    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.045, audioCtx.currentTime + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.38);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+  }catch(e){}
+}
+
+function playCrashSound(){
+  try{
+    ensureAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(240, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(48, audioCtx.currentTime + 0.35);
+    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.07, audioCtx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.42);
+  }catch(e){}
+}
+
+function playCashoutSound(){
+  try{
+    ensureAudio();
+    [660, 840].forEach((freq, index) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const start = audioCtx.currentTime + index * 0.08;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.04, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(start); osc.stop(start + 0.18);
+    });
+  }catch(e){}
+}
+
+function parseMoney(value){
+  return parseFloat(String(value).replace(/\s+/g,'').replace(/\./g,'').replace(',', '.'));
+}
+
+function updateBalance(){
+  balanceEl.textContent = fmtMoney(balance);
+  localStorage.setItem(STORAGE_KEY, String(balance));
+}
+
+function setStatus(message, tone=''){
+  statusLine.className = 'status-line' + (tone ? ' ' + tone : '');
+  statusLine.textContent = message;
+}
+
+function renderHistory(){
+  if(historyValues.length === 0){
+    historyRow.innerHTML = '<span class="hist-pill">Sem histórico</span>';
+    return;
+  }
+
+  historyRow.innerHTML = historyValues.map(value => {
+    const n = parseFloat(value);
+    const cls = n >= 10 ? 'mega' : n >= 5 ? 'high' : n >= 2 ? 'mid' : 'low';
+    return `<span class="hist-pill ${cls}">${value}x</span>`;
+  }).join('');
+}
+
+function addHistory(value){
+  historyValues.unshift(Number(value).toFixed(2));
+  historyValues = historyValues.slice(0, 10);
+  renderHistory();
+  crashBadge.textContent = `Último crash: ${Number(value).toFixed(2)}x`;
+}
+
+function openDeposit(initial=false){
+  const suggested = initial && balance <= 0 ? '1000' : '';
+  const raw = prompt(initial ? 'Escolha seu saldo inicial:' : 'Digite o valor do depósito:', suggested);
+  if(raw === null) return;
+
+  const amount = parseMoney(raw);
+  if(isNaN(amount) || amount <= 0){
+    setStatus('Digite um valor válido para depositar.', 'lose');
+    return;
+  }
+
+  balance += amount;
+  updateBalance();
+  setStatus('Depósito realizado com sucesso.', 'win');
+}
+
+function generateCrash(){
+  const r = Math.random();
+  const crash = 0.99 / (1 - r);
+  return Number(Math.min(Math.max(crash, 1.05), 30).toFixed(2));
+}
+
+function updateGraph(value){
+  const w = gameArea.clientWidth || 900;
+  const h = gameArea.clientHeight || 390;
+  const startX = 30;
+  const startY = h - 40;
+  const endX = w - 46;
+  const rise = h * 0.7;
+  const safeCrash = Math.max(crashPoint, 1.2);
+  const t = Math.max(0, Math.min((value - 1) / (safeCrash - 1), 1));
+  const x = startX + t * (endX - startX);
+  const y = startY - t * rise;
+  const lineD = `M ${startX} ${startY} L ${x} ${y}`;
+  const fillD = `M ${startX} ${startY} L ${x} ${y} L ${x} ${startY} Z`;
+
+  document.querySelector('.graph-svg').setAttribute('viewBox', `0 0 ${w} ${h}`);
+  fillArea.setAttribute('d', fillD);
+  trailPath.setAttribute('d', lineD);
+  trailGlow.setAttribute('d', lineD);
+  plane.style.left = `${x}px`;
+  plane.style.top = `${y}px`;
+  plane.style.transform = `translate(-50%,-50%) rotate(-12deg)`;
+}
+
+function renderCashoutPreview(){
+  const amount = playing && activeBet ? Number((betAmount * multiplier).toFixed(2)) : 0;
+  cashPreview.textContent = fmtMoney(amount);
+  cashBtn.textContent = amount > 0 ? `Retirar ${fmtMoney(amount)}` : 'Retirar';
+}
+
+function showCrashFlash(){
+  flashOverlay.classList.remove('show');
+  void flashOverlay.offsetWidth;
+  flashOverlay.classList.add('show');
+}
+
+function showLossPopup(amount){
+  lossValue.textContent = fmtMoney(amount);
+  lossPopup.classList.remove('show');
+  void lossPopup.offsetWidth;
+  lossPopup.classList.add('show');
+}
+
+function resetVisual(){
+  multiplier = 1;
+  multiplierEl.textContent = '1.00x';
+  multiplierEl.classList.remove('crash');
+  roundText.textContent = 'Aguardando próxima rodada';
+  plane.style.opacity = '1';
+  flashOverlay.classList.remove('show');
+  updateGraph(1);
+  renderCashoutPreview();
+}
+
+function queueAutoRound(delay = 7000){
+  clearTimeout(autoRoundTimer);
+  clearInterval(countdownTicker);
+
+  const startedAt = Date.now();
+  const renderCountdown = () => {
+    const remainingMs = Math.max(delay - (Date.now() - startedAt), 0);
+    const remainingSec = (remainingMs / 1000).toFixed(1);
+    roundText.textContent = `Próxima rodada em ${remainingSec}s`;
+    setStatus(`Nova rodada começa em ${Math.ceil(remainingMs / 1000)}s.`, 'active');
+  };
+
+  renderCountdown();
+  countdownTicker = setInterval(renderCountdown, 100);
+
+  autoRoundTimer = setTimeout(() => {
+    clearInterval(countdownTicker);
+    countdownTicker = null;
+    if(playing) return;
+    const nextBet = parseFloat(betInput.value);
+    if(!isNaN(nextBet) && nextBet > 0 && balance >= nextBet){
+      startRound();
+    } else if(!isNaN(nextBet) && nextBet > 0 && balance < nextBet){
+      setStatus('Saldo insuficiente. Faça um depósito.', 'lose');
+    }
+  }, delay);
+}
+
+function endRound(){
+  playing = false;
+  activeBet = false;
+  cashedOut = false;
+  betBtn.disabled = false;
+  cashBtn.disabled = true;
+  betInput.disabled = false;
+}
+
+function animate(now){
+  if(!playing) return;
+
+  const elapsed = now - roundStart;
+  const seconds = elapsed / 1000;
+  multiplier = Number(Math.max(1, Math.exp(Math.pow(seconds, 1.22) / 9.8)).toFixed(2));
+  multiplierEl.textContent = `${multiplier.toFixed(2)}x`;
+  roundText.textContent = cashedOut ? 'Aguardando o crash' : 'Voando...';
+  updateGraph(multiplier);
+  renderCashoutPreview();
+
+  if(multiplier >= crashPoint){
+    doCrash();
+    return;
+  }
+
+  animId = requestAnimationFrame(animate);
+}
+
+function startRound(){
+  if(playing) return;
+
+  clearTimeout(autoRoundTimer);
+  clearInterval(countdownTicker);
+  betAmount = parseFloat(betInput.value);
+  if(isNaN(betAmount) || betAmount <= 0){
+    setStatus('Digite uma aposta válida.', 'lose');
+    return;
+  }
+  if(betAmount > balance){
+    setStatus('Saldo insuficiente. Faça um depósito.', 'lose');
+    return;
+  }
+
+  balance -= betAmount;
+  updateBalance();
+  playTakeoffSound();
+
+  crashPoint = generateCrash();
+  playing = true;
+  activeBet = true;
+  cashedOut = false;
+  roundStart = performance.now();
+  gameArea.classList.remove('crashed');
+
+  betBtn.disabled = true;
+  cashBtn.disabled = false;
+  betInput.disabled = true;
+
+  setStatus('Rodada iniciada. Boa sorte!', 'active');
+  animId = requestAnimationFrame(animate);
+}
+
+function cashout(){
+  if(!playing || !activeBet || cashedOut) return;
+
+  const win = Number((betAmount * multiplier).toFixed(2));
+  balance += win;
+  updateBalance();
+  playCashoutSound();
+
+  cashedOut = true;
+  activeBet = false;
+  cashBtn.disabled = true;
+  renderCashoutPreview();
+  setStatus(`Retirado em ${multiplier.toFixed(2)}x.`, 'win');
+}
+
+function doCrash(){
+  cancelAnimationFrame(animId);
+  animId = null;
+  playing = false;
+
+  showCrashFlash();
+  playCrashSound();
+
+  multiplierEl.textContent = `${crashPoint.toFixed(2)}x`;
+  multiplierEl.classList.add('crash');
+  roundText.textContent = 'CRASH';
+  gameArea.classList.add('crashed');
+  addHistory(crashPoint);
+
+  if(!cashedOut){
+    showLossPopup(betAmount);
+    setStatus(`Crash em ${crashPoint.toFixed(2)}x. Você perdeu a rodada.`, 'lose');
+  } else {
+    setStatus(`Round encerrado em ${crashPoint.toFixed(2)}x.`, 'active');
+  }
+
+  betBtn.disabled = false;
+  cashBtn.disabled = true;
+  betInput.disabled = false;
+
+  setTimeout(() => {
+    endRound();
+    resetVisual();
+    queueAutoRound(7000);
+  }, 1500);
+}
+
+betBtn.onclick = startRound;
+cashBtn.onclick = cashout;
+window.addEventListener('pointerdown', ensureAudio);
+window.addEventListener('resize', () => updateGraph(Math.max(multiplier, 1)));
+
+updateBalance();
+renderHistory();
+resetVisual();
+queueAutoRound(7000);
+
+window.addEventListener('storage', () => {
+  balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+  updateBalance();
+  renderCashoutPreview();
+});
+
+if(balance <= 0){
+  setStatus('Volte ao hub para depositar saldo.', 'active');
+}
+</script>
+</body>
+</html>

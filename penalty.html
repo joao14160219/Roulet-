@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="icon.png">
+<title>Penalty Shoot-Out</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #1a0a2e;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+.sky {
+  position: fixed; inset: 0;
+  background: linear-gradient(180deg, #5ab5e8 0%, #87ceeb 30%, #b8e8b8 65%, #5aaa2e 100%);
+  z-index: 0;
+}
+.wrapper {
+  position: relative; z-index: 10;
+  width: 100%; max-width: 740px;
+  padding: 10px 14px 36px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+/* HEADER */
+header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #111827;
+  border-radius: 18px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  flex-wrap: wrap;
+}
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.page-back,
+.game-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.page-back {
+  background: #1f2937;
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+}
+.game-icon {
+  background: linear-gradient(135deg, #FFE033, #FFA500);
+  color: #1a0a00;
+  font-size: 18px;
+}
+.logo-text strong {
+  display: block;
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  color: #fff;
+  letter-spacing: .4px;
+}
+.logo-text span {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: rgba(255,255,255,.68);
+}
+.page-live {
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #1f2937;
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+}
+.balance-pill {
+  background: #1f2937;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: none;
+}
+
+/* TRACK */
+.track-bar {
+  width: 100%;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50px; padding: 10px 20px;
+  display: flex; align-items: center; gap: 0;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.flag { font-size: 22px; flex-shrink: 0; }
+.track-inner {
+  flex: 1; display: flex; align-items: center;
+  position: relative; margin: 0 10px;
+}
+.track-bg-line {
+  position: absolute; height: 8px;
+  background: rgba(255,255,255,0.15); border-radius: 4px;
+  left: 0; right: 0; z-index: 0;
+}
+.track-fill {
+  position: absolute; height: 8px;
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  border-radius: 4px; left: 0; z-index: 1;
+  transition: width 0.5s cubic-bezier(.4,2,.6,1);
+}
+.track-nodes {
+  display: flex; justify-content: space-between;
+  width: 100%; position: relative; z-index: 2;
+}
+.track-node { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.node-ball {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 3px solid rgba(255,255,255,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; transition: all 0.4s; position: relative; z-index: 2;
+}
+.node-ball.done { background: linear-gradient(135deg,#4caf50,#81c784); border-color:#fff; box-shadow:0 0 12px rgba(76,175,80,0.8); }
+.node-ball.current { background: linear-gradient(135deg,#FFE033,#FFA500); border-color:#fff; box-shadow:0 0 18px rgba(255,224,51,0.9); animation: npulse 1s ease-in-out infinite; }
+@keyframes npulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
+.node-label { font-family:'Fredoka One',cursive; font-size:12px; color:rgba(255,255,255,0.6); }
+.node-label.done { color:#81c784; }
+.node-label.current { color:#FFE033; }
+
+/* GAME AREA */
+.game-area {
+  width: 100%; position: relative;
+  border-radius: 18px; overflow: hidden;
+  border: 3px solid rgba(255,255,255,0.2);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+.field-canvas {
+  width: 100%; aspect-ratio: 16/9; position: relative;
+  /* Sky + grass stripes */
+  background: linear-gradient(180deg,
+    #87ceeb 0%, #87ceeb 30%,
+    #5ab85a 30%, #4da84d 42%, #52b852 42%, #47a847 56%,
+    #52b852 56%, #4da84d 70%, #52b852 70%, #5ab85a 100%
+  );
+}
+
+/* GOAL STRUCTURE */
+.goal-wrap {
+  position: absolute;
+  top: 5%;
+  left: 50%; transform: translateX(-50%);
+  width: 64%; height: 44%;
+  z-index: 5;
+}
+.goal-post-l, .goal-post-r {
+  position: absolute; top: 0; bottom: -5px;
+  width: 5px; background: white; border-radius: 2px;
+  box-shadow: 0 0 8px rgba(255,255,255,0.5);
+}
+.goal-post-l { left: 0; }
+.goal-post-r { right: 0; }
+.goal-crossbar {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 5px; background: white; border-radius: 2px;
+  box-shadow: 0 0 8px rgba(255,255,255,0.5);
+}
+.goal-net {
+  position: absolute;
+  top: 5px; left: 5px; right: 5px; bottom: 0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.17) 0, rgba(255,255,255,0.17) 1px, transparent 1px, transparent 16px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.17) 0, rgba(255,255,255,0.17) 1px, transparent 1px, transparent 16px);
+  background-color: rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+/* ─── CLICKABLE ZONES (6 cells inside net) ─── */
+.zones {
+  position: absolute; inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 4px; padding: 4px;
+  z-index: 20;
+}
+.zone {
+  border-radius: 7px;
+  border: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.zone-inner {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  border: 2px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: rgba(255,255,255,0.4);
+  transition: all 0.18s;
+  pointer-events: none;
+}
+.zone:hover .zone-inner {
+  background: rgba(255,255,0,0.3);
+  border-color: rgba(255,255,0,0.9);
+  color: yellow; transform: scale(1.2);
+}
+.zone:hover { background: rgba(255,255,0,0.08); border-color: rgba(255,255,0,0.4); }
+.zone.locked { pointer-events: none; }
+
+/* ─── KEEPER ─── */
+.keeper-wrap {
+  position: absolute;
+  bottom: 40%;
+  left: 50%; transform: translateX(-50%);
+  width: 10%; z-index: 15;
+  transition: transform 0.36s cubic-bezier(0.25, 1.4, 0.5, 1);
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.55));
+}
+
+/* ─── BALL ─── */
+.ball-wrap {
+  position: absolute;
+  bottom: 9%;
+  left: 50%; transform: translateX(-50%);
+  width: 6%; z-index: 16;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.45));
+}
+.ball-wrap.shoot {
+  animation: ballFly 0.48s cubic-bezier(0.2, 0.9, 0.35, 1) forwards;
+}
+@keyframes ballFly {
+  0%   { bottom: 9%;  transform: translateX(var(--bx)) scale(1); }
+  100% { bottom: var(--by); transform: translateX(var(--bx)) scale(0.62); }
+}
+
+/* FLASH */
+.result-flash {
+  position: absolute; inset: 0; z-index: 30;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; border-radius: 15px;
+  transition: opacity 0.12s;
+}
+.result-flash.show { opacity: 1; }
+.result-flash.gfl { background: radial-gradient(ellipse, rgba(0,255,80,0.35) 0%, transparent 70%); }
+.result-flash.mfl { background: radial-gradient(ellipse, rgba(255,40,40,0.35) 0%, transparent 70%); }
+.result-text {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(38px, 9vw, 76px);
+  letter-spacing: 3px;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  transform: scale(0.3) rotate(-8deg);
+  transition: transform 0.28s cubic-bezier(0.34,1.7,0.64,1);
+}
+.result-flash.show .result-text { transform: scale(1) rotate(0); }
+.result-flash.gfl .result-text { color: #7fff00; }
+.result-flash.mfl .result-text { color: #ff4444; }
+
+/* STATUS */
+.status-msg {
+  width: 100%; text-align: center;
+  font-size: 13px; font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.5);
+  border-radius: 10px; padding: 8px 16px; min-height: 34px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* BET PANEL */
+.bet-panel {
+  width: 100%;
+  background: rgba(0,0,0,0.55);
+  border-radius: 16px; padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.bet-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom:2px; }
+.bet-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bet-input {
+  background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.18);
+  border-radius: 10px; color: #FFE033;
+  font-family: 'Fredoka One', cursive; font-size: 22px;
+  padding: 6px 14px; width: 130px; outline: none; transition: border-color 0.2s;
+}
+.bet-input:focus { border-color: #FFE033; }
+.chip-btn {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px; color: white; font-size: 13px; font-weight: 700;
+  padding: 6px 12px; cursor: pointer; transition: all 0.15s;
+}
+.chip-btn:hover { background: rgba(255,255,255,0.22); }
+.mult-info {
+  text-align: center; font-family:'Fredoka One',cursive;
+  font-size: 13px; color: rgba(255,255,255,0.55);
+}
+.mult-info span { color: #FFE033; font-size: 17px; }
+.cashout-btn {
+  background: linear-gradient(135deg, #FFE033, #FFA500);
+  border: none; border-radius: 12px; color: #1a0a00;
+  font-family: 'Fredoka One', cursive; font-size: 17px;
+  padding: 12px 24px; cursor: pointer; width: 100%;
+  box-shadow: 0 4px 16px rgba(255,165,0,0.5);
+  transition: all 0.2s; display: none;
+}
+.cashout-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(255,165,0,0.7); }
+.cashout-btn.show { display: block; }
+
+/* HISTORY */
+.history-panel {
+  width: 100%; background: rgba(0,0,0,0.4);
+  border-radius: 14px; padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.history-title { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.35); margin-bottom:8px; }
+.history-list { display:flex; flex-direction:column; gap:5px; }
+.h-item {
+  display:flex; justify-content:space-between; align-items:center;
+  background:rgba(255,255,255,0.05); border-radius:8px;
+  padding:6px 12px; font-size:12px;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateX(-10px);} to{opacity:1;transform:translateX(0);} }
+.h-desc { color:rgba(255,255,255,0.5); }
+.h-res { font-weight:800; }
+.h-res.ok { color:#7fff00; }
+.h-res.ko { color:#ff4444; }
+.h-amt { font-family:'Fredoka One',cursive; font-size:14px; }
+.h-amt.pos { color:#FFE033; }
+.h-amt.neg { color:#ff6666; }
+
+/* CONFETTI */
+.confetti-wrap { position:fixed; inset:0; pointer-events:none; z-index:999; overflow:hidden; }
+.cfp { position:absolute; top:-12px; border-radius:2px; animation: cfFall 1.5s ease-in forwards; }
+@keyframes cfFall { to { transform: translateY(110vh) rotate(900deg); opacity:0; } }
+
+/* INTRO */
+.intro-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.78);
+  z-index:200; display:flex; align-items:center; justify-content:center;
+}
+.intro-box {
+  background:linear-gradient(135deg,#1e3a2f,#0d2018);
+  border:2px solid #4caf50; border-radius:20px;
+  padding:28px 36px; max-width:400px; text-align:center;
+  box-shadow:0 0 60px rgba(76,175,80,0.3);
+}
+.intro-box h2 { font-family:'Fredoka One',cursive; font-size:26px; color:#FFE033; margin-bottom:10px; }
+.intro-box p { color:rgba(255,255,255,0.8); font-size:13px; line-height:1.65; margin-bottom:18px; }
+.play-btn {
+  background:linear-gradient(135deg,#4caf50,#81c784); border:none; border-radius:50px;
+  color:white; font-family:'Fredoka One',cursive; font-size:20px;
+  padding:14px 40px; cursor:pointer; box-shadow:0 6px 20px rgba(76,175,80,0.6);
+  transition:transform 0.15s;
+}
+.play-btn:hover { transform:scale(1.05); }
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<div class="confetti-wrap" id="cfWrap"></div>
+
+<!-- Intro -->
+<div class="intro-overlay" id="introOverlay">
+  <div class="intro-box">
+    <h2>⚽ PENALTY SHOOT-OUT</h2>
+    <p>
+      Clique diretamente nas zonas dentro do gol para chutar!<br><br>
+      Acerte seguido para escalar os multiplicadores:<br>
+      <strong style="color:#FFE033">×2 → ×4 → ×8 → ×16 → ×32</strong><br><br>
+      Erre uma vez → perde tudo.<br>
+      Saque a qualquer momento após o 1º gol!
+    </p>
+    <button class="play-btn" onclick="closeIntro()">▶ JOGAR AGORA</button>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <header>
+    <div class="header-left">
+      <a class="page-back" href="hub.html" aria-label="Voltar ao início">←</a>
+      <div class="game-icon">⚽</div>
+      <div class="logo-text">
+        <strong>Penalty</strong>
+        <span>plinio.bet</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="page-live">AO VIVO</div>
+      <div class="balance-pill">R$ <span id="balDisp">1.000,00</span></div>
+    </div>
+  </header>
+
+  <!-- Multiplier track -->
+  <div class="track-bar">
+    <div class="flag">🇧🇷</div>
+    <div class="track-inner">
+      <div class="track-bg-line"></div>
+      <div class="track-fill" id="trackFill" style="width:0%"></div>
+      <div class="track-nodes" id="trackNodes"></div>
+    </div>
+    <div class="flag">🇮🇪</div>
+  </div>
+
+  <!-- Game field -->
+  <div class="game-area">
+    <div class="field-canvas" id="field">
+
+      <!-- Goal frame -->
+      <div class="goal-wrap" id="goalWrap">
+        <div class="goal-post-l"></div>
+        <div class="goal-post-r"></div>
+        <div class="goal-crossbar"></div>
+
+        <!-- Net + zones -->
+        <div class="goal-net">
+          <div class="zones" id="zones">
+            <!-- Top row: zones 0,1,2 -->
+            <div class="zone" data-z="0" onclick="shoot(0)"><div class="zone-inner">↖</div></div>
+            <div class="zone" data-z="1" onclick="shoot(1)"><div class="zone-inner">⬆</div></div>
+            <div class="zone" data-z="2" onclick="shoot(2)"><div class="zone-inner">↗</div></div>
+            <!-- Bottom row: zones 3,4,5 -->
+            <div class="zone" data-z="3" onclick="shoot(3)"><div class="zone-inner">↙</div></div>
+            <div class="zone" data-z="4" onclick="shoot(4)"><div class="zone-inner">⬇</div></div>
+            <div class="zone" data-z="5" onclick="shoot(5)"><div class="zone-inner">↘</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keeper -->
+      <div class="keeper-wrap" id="keeper">
+        <svg viewBox="0 0 60 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="56" width="8" height="17" rx="4" fill="#1565C0"/>
+          <rect x="32" y="56" width="8" height="17" rx="4" fill="#1565C0"/>
+          <ellipse cx="24" cy="73" rx="6" ry="3.5" fill="#111"/>
+          <ellipse cx="36" cy="73" rx="6" ry="3.5" fill="#111"/>
+          <rect x="16" y="32" width="28" height="26" rx="8" fill="#E65100"/>
+          <rect x="16" y="36" width="28" height="4" rx="2" fill="#BF360C" opacity="0.5"/>
+          <rect x="16" y="46" width="28" height="4" rx="2" fill="#BF360C" opacity="0.5"/>
+          <text x="30" y="51" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial">1</text>
+          <rect x="3" y="34" width="15" height="7" rx="3.5" fill="#E65100"/>
+          <circle cx="5" cy="37" r="4.5" fill="#FFD600" stroke="#FFA000" stroke-width="1.5"/>
+          <rect x="42" y="34" width="15" height="7" rx="3.5" fill="#E65100"/>
+          <circle cx="55" cy="37" r="4.5" fill="#FFD600" stroke="#FFA000" stroke-width="1.5"/>
+          <rect x="25" y="26" width="10" height="8" rx="3" fill="#F5CBA7"/>
+          <ellipse cx="30" cy="20" rx="13" ry="13" fill="#F5CBA7"/>
+          <ellipse cx="30" cy="9" rx="13" ry="8" fill="#3E2723"/>
+          <circle cx="24" cy="20" r="2.5" fill="white"/>
+          <circle cx="36" cy="20" r="2.5" fill="white"/>
+          <circle cx="24.5" cy="20.5" r="1.3" fill="#111"/>
+          <circle cx="36.5" cy="20.5" r="1.3" fill="#111"/>
+          <path d="M25 27 Q30 31 35 27" stroke="#c0706a" stroke-width="1.5" fill="none"/>
+          <rect x="17" y="9" width="26" height="6" rx="3" fill="#1565C0"/>
+          <rect x="13" y="13" width="34" height="4" rx="2" fill="#1565C0"/>
+        </svg>
+      </div>
+
+      <!-- Ball -->
+      <div class="ball-wrap" id="ball">
+        <svg viewBox="0 0 30 30" fill="none">
+          <circle cx="15" cy="15" r="14" fill="white" stroke="#ddd" stroke-width="1"/>
+          <polygon points="15,7 19,11 15,15 11,11" fill="#1a1a1a"/>
+          <polygon points="15,15 20,14 22,19 15,21 8,19 10,14" fill="#1a1a1a"/>
+          <polygon points="7,10 11,10 10,14 7,18 3,15" fill="#1a1a1a"/>
+          <polygon points="23,10 27,15 23,18 20,14 19,10" fill="#1a1a1a"/>
+          <polygon points="15,7 20,8 23,10 19,10" fill="#1a1a1a"/>
+          <polygon points="15,7 10,8 7,10 11,10" fill="#1a1a1a"/>
+        </svg>
+      </div>
+
+      <!-- Result flash -->
+      <div class="result-flash" id="resFlash">
+        <div class="result-text" id="resText"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="status-msg" id="statusMsg">Clique em uma zona dentro do gol para chutar!</div>
+
+  <!-- Bet Panel -->
+  <div class="bet-panel">
+    <div class="bet-label">Aposta</div>
+    <div class="bet-row">
+      <input class="bet-input" id="betInput" type="number" value="10" min="1" step="1">
+      <button class="chip-btn" onclick="chipAdd(5)">+5</button>
+      <button class="chip-btn" onclick="chipAdd(10)">+10</button>
+      <button class="chip-btn" onclick="chipAdd(50)">+50</button>
+      <button class="chip-btn" onclick="betDouble()">×2</button>
+      <button class="chip-btn" onclick="betHalf()">½ saldo</button>
+    </div>
+    <div class="mult-info" id="multInfo">Fase 1 de 5 — Primeiro multiplicador: <span>×2</span></div>
+    <button class="cashout-btn" id="cashoutBtn" onclick="doCashout()">
+      💰 SACAR — R$ <span id="cashoutAmt">0,00</span>
+    </button>
+  </div>
+
+  <!-- History -->
+  <div class="history-panel">
+    <div class="history-title">Histórico de Jogadas</div>
+    <div class="history-list" id="histList">
+      <div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;">Nenhuma jogada ainda</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const MULTS = [2, 4, 8, 16, 32];
+
+/*
+  Zone layout (2×3 grid inside goal):
+    [0=top-left]  [1=top-center]  [2=top-right]
+    [3=bot-left]  [4=bot-center]  [5=bot-right]
+
+  Keeper has 3 positions → each covers 2 zones (one column):
+    LEFT   → covers zones 0 and 3  (left column)
+    CENTER → covers zones 1 and 4  (center column)
+    RIGHT  → covers zones 2 and 5  (right column)
+
+  If player's zone IS covered → SAVE.  Otherwise → GOAL.
+  This is the CORRECT logic — keeper position is independent of player choice.
+*/
+const KEEPER_POS = [
+  { name: 'left',   covers: [0,3], tx: 'translateX(calc(-50% - 54px))' },
+  { name: 'center', covers: [1,4], tx: 'translateX(-50%)' },
+  { name: 'right',  covers: [2,5], tx: 'translateX(calc(-50% + 54px))' },
+];
+
+// Ball visual target X per zone
+const BALL_TX = [
+  'calc(-50% - 68px)',  // 0 top-left
+  '-50%',               // 1 top-center
+  'calc(-50% + 68px)',  // 2 top-right
+  'calc(-50% - 68px)',  // 3 bot-left
+  '-50%',               // 4 bot-center
+  'calc(-50% + 68px)',  // 5 bot-right
+];
+// Ball visual target bottom% per zone
+const BALL_BY = ['50%','50%','50%','38%','38%','38%'];
+
+const ZONE_NAMES = ['Topo-Esq','Topo-Cen','Topo-Dir','Baixo-Esq','Baixo-Cen','Baixo-Dir'];
+const KEEPER_PT  = { left:'a esquerda', center:'o centro', right:'a direita' };
+
+// ============================================================
+// STATE
+// ============================================================
+let balance   = 1000;
+let round     = 0;        // 0-4 (index into MULTS)
+let inSeries  = false;
+let seriesBet = 0;
+let locked    = false;
+let history   = [];
+
+// ============================================================
+// BOOT
+// ============================================================
+buildTrack();
+renderBalance();
+renderMultInfo();
+
+function closeIntro() { document.getElementById('introOverlay').style.display='none'; }
+
+function buildTrack() {
+  const el = document.getElementById('trackNodes');
+  el.innerHTML = '';
+  MULTS.forEach((m,i) => {
+    const d = document.createElement('div');
+    d.className = 'track-node';
+    d.innerHTML = `<div class="node-ball" id="nb${i}">⚽</div><div class="node-label" id="nl${i}">×${m}</div>`;
+    el.appendChild(d);
+  });
+  syncTrack();
+}
+
+function syncTrack() {
+  MULTS.forEach((_,i) => {
+    const nb = document.getElementById('nb'+i);
+    const nl = document.getElementById('nl'+i);
+    nb.className = 'node-ball' + (i<round?' done':i===round?' current':'');
+    nl.className = 'node-label' + (i<round?' done':i===round?' current':'');
+  });
+  const pct = round===0 ? 0 : Math.round((round/MULTS.length)*100);
+  document.getElementById('trackFill').style.width = pct+'%';
+}
+
+// ============================================================
+// SHOOT
+// ============================================================
+async function shoot(zone) {
+  if (locked) return;
+
+  // Start series
+  if (!inSeries) {
+    const bet = parseFloat(document.getElementById('betInput').value)||0;
+    if (bet<=0 || bet>balance) { setStatus('❌ Aposta inválida!'); return; }
+    balance -= bet;
+    seriesBet = bet;
+    round = 0;
+    inSeries = true;
+    renderBalance();
+  }
+
+  locked = true;
+  lockZones(true);
+
+  // ── Random keeper (independent of player choice!) ──
+  const kp = KEEPER_POS[Math.floor(Math.random()*3)];
+
+  // ── RESULT: goal only if keeper does NOT cover chosen zone ──
+  const isGoal = !kp.covers.includes(zone);
+
+  // ── Keeper jumps to position ──
+  const keeperEl = document.getElementById('keeper');
+  keeperEl.style.transition = 'transform 0.36s cubic-bezier(0.25,1.4,0.5,1)';
+  keeperEl.style.transform  = kp.tx;
+
+  // ── Ball flies ──
+  await flyBall(zone);
+  await wait(120);
+
+  // ── Flash ──
+  showFlash(isGoal);
+  if (isGoal) fireConfetti(22);
+
+  await wait(680);
+
+  if (isGoal) {
+    round++;
+    if (round >= MULTS.length) {
+      // Max reached — auto-cashout
+      const win = seriesBet * MULTS[MULTS.length-1];
+      balance += win;
+      pushHistory(zone, kp.name, true, seriesBet, win, 'max');
+      setStatus(`🏆 MÁXIMO! ×${MULTS[MULTS.length-1]} — Ganhou R$${fmt(win)}!`);
+      fireConfetti(50);
+      await wait(400);
+      hideFlash();
+      endSeries();
+    } else {
+      pushHistory(zone, kp.name, true, seriesBet, seriesBet*MULTS[round-1], 'ongoing');
+      setStatus(`⚽ GOL! ×${MULTS[round-1]} garantido. Continue para ×${MULTS[round]}!`);
+      await wait(200);
+      hideFlash();
+      syncTrack();
+      renderMultInfo();
+      renderBalance();
+      resetBall();
+      resetKeeper();
+      locked = false;
+      lockZones(false);
+    }
+  } else {
+    pushHistory(zone, kp.name, false, seriesBet, 0, 'loss');
+    setStatus(`🧤 DEFESA! Goleiro foi para ${KEEPER_PT[kp.name]}. Perdeu R$${fmt(seriesBet)}.`);
+    await wait(400);
+    hideFlash();
+    endSeries();
+  }
+}
+
+// ============================================================
+// CASHOUT
+// ============================================================
+function doCashout() {
+  if (!inSeries || round===0) return;
+  const win = seriesBet * MULTS[round-1];
+  balance += win;
+  pushHistory(null, null, true, seriesBet, win, 'cashout');
+  setStatus(`💰 Saque de R$${fmt(win)} realizado (×${MULTS[round-1]})!`);
+  fireConfetti(28);
+  endSeries();
+}
+
+// ============================================================
+// SERIES HELPERS
+// ============================================================
+function endSeries() {
+  inSeries  = false;
+  round     = 0;
+  locked    = false;
+  seriesBet = 0;
+  syncTrack();
+  renderMultInfo();
+  renderBalance();
+  resetBall();
+  resetKeeper();
+  lockZones(false);
+  document.getElementById('betInput').disabled = false;
+  document.getElementById('cashoutBtn').classList.remove('show');
+}
+
+async function flyBall(zone) {
+  const ball = document.getElementById('ball');
+  ball.style.setProperty('--bx', BALL_TX[zone]);
+  ball.style.setProperty('--by', BALL_BY[zone]);
+  ball.classList.add('shoot');
+  return wait(490);
+}
+
+function resetBall() {
+  const ball = document.getElementById('ball');
+  ball.classList.remove('shoot');
+  ball.style.cssText = '';
+  void ball.offsetWidth; // reflow
+}
+
+function resetKeeper() {
+  const el = document.getElementById('keeper');
+  el.style.transition = 'transform 0.4s';
+  el.style.transform  = 'translateX(-50%)';
+}
+
+function showFlash(isGoal) {
+  const f = document.getElementById('resFlash');
+  const t = document.getElementById('resText');
+  f.className = 'result-flash ' + (isGoal?'gfl':'mfl');
+  t.textContent = isGoal ? '⚽ GOL!' : '🧤 DEFESA!';
+  f.classList.add('show');
+}
+
+function hideFlash() {
+  document.getElementById('resFlash').className = 'result-flash';
+}
+
+function lockZones(val) {
+  document.querySelectorAll('.zone').forEach(z => {
+    val ? z.classList.add('locked') : z.classList.remove('locked');
+  });
+}
+
+// ============================================================
+// UI RENDER
+// ============================================================
+function renderBalance() {
+  document.getElementById('balDisp').textContent = fmt(balance);
+  const cashBtn = document.getElementById('cashoutBtn');
+  if (inSeries && round > 0) {
+    const win = seriesBet * MULTS[round-1];
+    document.getElementById('cashoutAmt').textContent = fmt(win);
+    cashBtn.classList.add('show');
+  } else {
+    cashBtn.classList.remove('show');
+  }
+  document.getElementById('betInput').disabled = inSeries;
+}
+
+function renderMultInfo() {
+  const el = document.getElementById('multInfo');
+  if (inSeries && round > 0) {
+    const cur  = MULTS[round-1];
+    const next = round < MULTS.length ? MULTS[round] : null;
+    el.innerHTML = next
+      ? `Atual: <span>×${cur}</span> — Próximo: <span>×${next}</span>`
+      : `Fase máxima! Multiplicador: <span>×${cur}</span>`;
+  } else {
+    el.innerHTML = `Fase 1 de ${MULTS.length} — Primeiro multiplicador: <span>×${MULTS[0]}</span>`;
+  }
+}
+
+function setStatus(msg) { document.getElementById('statusMsg').textContent = msg; }
+
+function fmt(v) { return v.toFixed(2).replace('.',','); }
+
+function wait(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+// ============================================================
+// HISTORY
+// ============================================================
+function pushHistory(zone, keeperSide, isGoal, bet, win, type) {
+  history.unshift({ zone, keeperSide, isGoal, bet, win, type });
+  if (history.length > 7) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('histList');
+  list.innerHTML = '';
+  if (!history.length) {
+    list.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;">Nenhuma jogada ainda</div>';
+    return;
+  }
+  history.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'h-item';
+    let desc, res, resC, amt, amtC;
+    if (h.type==='cashout') {
+      desc = 'Saque manual';
+      res='SAQUE'; resC='ok';
+    } else {
+      const zn = h.zone!==null ? ZONE_NAMES[h.zone] : '';
+      const kn = h.keeperSide ? KEEPER_PT[h.keeperSide] : '';
+      desc = zn ? `${zn} | Goleiro: ${kn}` : '';
+      res  = h.isGoal ? 'GOL' : 'DEFESA';
+      resC = h.isGoal ? 'ok' : 'ko';
+    }
+    amt  = h.isGoal ? `+R$${fmt(h.win)}` : `-R$${fmt(h.bet)}`;
+    amtC = h.isGoal ? 'pos' : 'neg';
+    el.innerHTML = `
+      <span class="h-desc">${desc}</span>
+      <span class="h-res ${resC}">${res}</span>
+      <span class="h-amt ${amtC}">${amt}</span>`;
+    list.appendChild(el);
+  });
+}
+
+// ============================================================
+// CHIP HELPERS
+// ============================================================
+function chipAdd(n) {
+  if (inSeries) return;
+  const i = document.getElementById('betInput');
+  i.value = Math.max(1,(parseFloat(i.value)||0)+n);
+}
+function betDouble() {
+  if (inSeries) return;
+  const i = document.getElementById('betInput');
+  i.value = Math.max(1,(parseFloat(i.value)||0)*2);
+}
+function betHalf() {
+  if (inSeries) return;
+  document.getElementById('betInput').value = Math.max(1,Math.floor(balance/2));
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function fireConfetti(n=25) {
+  const wrap = document.getElementById('cfWrap');
+  const cols = ['#FFE033','#7fff00','#00bcd4','#FF6B00','#fff','#ff4081','#4caf50','#e91e63'];
+  for (let i=0;i<n;i++) {
+    const p = document.createElement('div');
+    p.className = 'cfp';
+    const sz = 6+Math.random()*8;
+    p.style.cssText = `
+      left:${Math.random()*100}vw;
+      width:${sz}px; height:${sz}px;
+      background:${cols[Math.floor(Math.random()*cols.length)]};
+      border-radius:${Math.random()>.5?'50%':'2px'};
+      animation-delay:${Math.random()*0.5}s;
+      animation-duration:${1.1+Math.random()*0.9}s;
+    `;
+    wrap.appendChild(p);
+    setTimeout(()=>p.remove(),2400);
+  }
+}
+</script>
+</body>
+</html>

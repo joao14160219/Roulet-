@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="icon.png">
+<title>Mines</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --blue-1:#0b5ed7;
+  --blue-2:#0a3d91;
+  --blue-3:#072c66;
+  --tile:#0a2455;
+  --tile-2:#081b40;
+  --yellow:#f4b321;
+  --orange:#e5531d;
+  --red:#e74c3c;
+  --white-soft:rgba(255,255,255,.78);
+}
+
+body{
+  min-height:100vh;
+  background:radial-gradient(circle at top,#1971ff 0%,#0a4bb8 18%,#0a3d91 48%,#062a63 100%);
+  font-family:Arial,sans-serif;
+  color:#fff;
+  padding:14px;
+}
+
+.hub-back{
+  text-decoration:none;
+  border:none;
+  border-radius:999px;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  padding:7px 12px;
+  font-size:12px;
+  background:linear-gradient(180deg,#5b78ff,#4663db);
+}
+
+.app{
+  width:min(760px,100%);
+  margin:0 auto;
+}
+
+.game-header-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.page-back{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:rgba(4,18,48,.45);
+  color:#fff;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  flex-shrink:0;
+}
+.game-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:linear-gradient(180deg,#f4b321,#d98d05);
+  color:#072c66;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  flex-shrink:0;
+}
+.game-brand strong{
+  display:block;
+  font-size:18px;
+}
+.game-brand small{
+  display:block;
+  color:rgba(255,255,255,.72);
+  font-size:11px;
+  margin-top:2px;
+}
+.page-live{
+  padding:7px 12px;
+  border-radius:999px;
+  background:rgba(4,18,48,.38);
+  border:1px solid rgba(255,255,255,.12);
+  font-size:12px;
+  font-weight:700;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+.brand{
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:1px;
+  opacity:.9;
+}
+
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.top-btn,
+#start,
+#cashout{
+  border:none;
+  border-radius:999px;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.top-btn{
+  padding:7px 12px;
+  font-size:12px;
+}
+
+.deposit-btn{ background:linear-gradient(180deg,#f4b321,#d98d05); }
+.switch-game-btn{ background:linear-gradient(180deg,#5b78ff,#4663db); }
+
+.balance-chip{
+  padding:7px 12px;
+  border-radius:999px;
+  background:rgba(4,18,48,.38);
+  border:1px solid rgba(255,255,255,.12);
+  font-size:12px;
+  font-weight:700;
+}
+
+.game-card{
+  background:linear-gradient(180deg,var(--blue-1) 0%,var(--blue-2) 58%,var(--blue-3) 100%);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;
+  padding:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 14px 30px rgba(0,0,0,.18);
+}
+
+.header-strip{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.meta-pill{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(4,18,48,.34);
+  border:1px solid rgba(255,255,255,.12);
+  font-size:12px;
+  font-weight:700;
+}
+
+.meta-pill input{
+  width:48px;
+  padding:3px 6px;
+  border:none;
+  border-radius:999px;
+  text-align:center;
+  font-weight:700;
+  color:#072c66;
+}
+
+.board-wrap{
+  display:flex;
+  justify-content:center;
+}
+
+.board{
+  display:grid;
+  grid-template-columns:repeat(5,64px);
+  gap:8px;
+}
+
+.tile{
+  width:64px;
+  height:64px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(180deg,var(--tile) 0%,var(--tile-2) 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.05), 0 5px 0 rgba(2,10,30,.35);
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:transform .12s ease, filter .12s ease;
+}
+.tile::before{
+  content:'';
+  position:absolute;
+  inset:13px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, rgba(122,180,255,.45), rgba(3,12,34,.2) 58%, transparent 60%);
+  opacity:.8;
+}
+.tile:hover:not(.safe):not(.mine){
+  transform:translateY(-1px) scale(1.03);
+  filter:brightness(1.06);
+}
+.tile:disabled{ cursor:default; }
+
+.tile-icon{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  font-size:28px;
+  opacity:0;
+  transform:scale(.45) rotate(-18deg);
+}
+
+.tile.safe{
+  background:linear-gradient(180deg,#ffd15a 0%,var(--yellow) 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.16), 0 8px 16px rgba(244,179,33,.26);
+  animation:safeReveal .28s cubic-bezier(.2,.85,.25,1);
+}
+.tile.safe .tile-icon{
+  opacity:1;
+  transform:scale(1) rotate(0deg);
+}
+.tile.mine{
+  background:linear-gradient(180deg,#ff7a6a 0%,var(--red) 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.12), 0 8px 16px rgba(231,76,60,.26);
+  animation:mineReveal .28s cubic-bezier(.2,.85,.25,1);
+}
+.tile.mine .tile-icon{
+  opacity:1;
+  transform:scale(1) rotate(0deg);
+}
+
+.controls{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:10px;
+  align-items:center;
+}
+
+.bet-box{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  background:rgba(4,18,48,.34);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+}
+.bet-box input{
+  width:90px;
+  padding:7px 10px;
+  border:none;
+  border-radius:999px;
+  text-align:center;
+  font-weight:700;
+  color:#072c66;
+}
+
+#start,
+#cashout{
+  min-width:132px;
+  padding:11px 16px;
+  font-size:13px;
+  letter-spacing:.3px;
+}
+#start{ background:linear-gradient(180deg,#1fa2ff,#1476d3); }
+#cashout{ background:linear-gradient(180deg,#ff7436,var(--orange)); }
+#cashout:disabled{ opacity:.45; cursor:not-allowed; }
+
+.status{
+  margin-top:10px;
+  text-align:center;
+  font-size:13px;
+  color:var(--white-soft);
+  min-height:18px;
+}
+.status.active{ color:#ffe18c; }
+.status.win{ color:#adffc6; }
+.status.lose{ color:#ffb5b5; }
+
+@keyframes safeReveal{
+  0%{transform:scale(.86)}
+  55%{transform:scale(1.06)}
+  100%{transform:scale(1)}
+}
+@keyframes mineReveal{
+  0%{transform:scale(.86)}
+  45%{transform:scale(1.08)}
+  100%{transform:scale(1)}
+}
+@keyframes boomShake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-5px)}
+  40%{transform:translateX(5px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+.board.boom{ animation:boomShake .3s linear; }
+
+@media (max-width:560px){
+  .controls{
+    grid-template-columns:1fr;
+  }
+  #start,
+  #cashout,
+  .bet-box{
+    width:100%;
+  }
+  .board{
+    grid-template-columns:repeat(5,56px);
+    gap:7px;
+  }
+  .tile{
+    width:56px;
+    height:56px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="game-header-left">
+      <a class="page-back" href="hub.html" aria-label="Voltar ao início">←</a>
+      <div class="game-icon">💣</div>
+      <div class="game-brand"><strong>Mines</strong><small>plinio.bet</small></div>
+    </div>
+    <div class="top-actions">
+      <div class="page-live">AO VIVO</div>
+      <div class="balance-chip" id="balance">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div class="game-card">
+    <div class="header-strip">
+      <label class="meta-pill">
+        Minas
+        <input id="mines" type="number" value="3" min="1" max="24">
+      </label>
+      <div class="meta-pill">Multiplicador <span id="mult">1.00x</span></div>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+
+    <div class="controls">
+      <label class="bet-box">
+        Aposta
+        <input id="bet" type="number" value="10" min="1" step="1">
+      </label>
+      <button id="start">Iniciar</button>
+      <button id="cashout" disabled>Retirar</button>
+    </div>
+
+    <div class="status" id="status">Escolha a aposta e abra uma rodada.</div>
+  </div>
+</div>
+
+<script>
+const TOTAL_TILES = 25;
+const HOUSE_EDGE = 0.97;
+const STORAGE_KEY = 'casinoBalance';
+
+let balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+let minePositions = new Set();
+let gameActive = false;
+let opened = 0;
+let betAmount = 0;
+
+const board = document.getElementById('board');
+const balanceEl = document.getElementById('balance');
+const betInput = document.getElementById('bet');
+const minesInput = document.getElementById('mines');
+const multEl = document.getElementById('mult');
+const cashoutBtn = document.getElementById('cashout');
+const statusEl = document.getElementById('status');
+const startBtn = document.getElementById('start');
+
+function fmtMoney(v){
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function parseMoney(value){
+  return parseFloat(String(value).replace(/\s+/g, '').replace(/\./g, '').replace(',', '.'));
+}
+
+function persistBalance(){
+  localStorage.setItem(STORAGE_KEY, String(balance));
+}
+
+function updateBalance(){
+  balanceEl.textContent = fmtMoney(balance);
+  persistBalance();
+}
+
+function setStatus(message, tone=''){
+  statusEl.className = 'status' + (tone ? ' ' + tone : '');
+  statusEl.textContent = message;
+}
+
+function getMineCount(){
+  const value = parseInt(minesInput.value, 10);
+  const limited = Math.min(24, Math.max(1, isNaN(value) ? 3 : value));
+  minesInput.value = limited;
+  return limited;
+}
+
+function calcMultiplier(){
+  const mineCount = getMineCount();
+  const safeTiles = TOTAL_TILES - mineCount;
+  let mult = 1;
+
+  for(let i = 0; i < opened; i++){
+    mult *= (TOTAL_TILES - i) / (safeTiles - i);
+  }
+
+  return Number((mult * HOUSE_EDGE).toFixed(2));
+}
+
+function renderCashout(){
+  const amount = gameActive && opened > 0 ? betAmount * calcMultiplier() : 0;
+  cashoutBtn.textContent = amount > 0 ? `Retirar ${fmtMoney(amount)}` : 'Retirar';
+  multEl.textContent = `${(opened > 0 ? calcMultiplier() : 1).toFixed(2)}x`;
+}
+
+function openDeposit(initial=false){
+  const suggested = initial && balance <= 0 ? '1000' : '';
+  const raw = prompt(initial ? 'Escolha seu saldo inicial:' : 'Digite o valor do depósito:', suggested);
+  if(raw === null) return;
+
+  const amount = parseMoney(raw);
+  if(isNaN(amount) || amount <= 0){
+    setStatus('Digite um valor válido para depositar.', 'lose');
+    return;
+  }
+
+  balance += amount;
+  updateBalance();
+  setStatus('Depósito realizado com sucesso.', 'win');
+}
+
+function buildBoard(){
+  board.innerHTML = '';
+
+  for(let i = 0; i < TOTAL_TILES; i++){
+    const tile = document.createElement('button');
+    tile.className = 'tile';
+    tile.type = 'button';
+    tile.dataset.index = i;
+    tile.innerHTML = '<span class="tile-icon"></span>';
+    tile.onclick = () => clickTile(i);
+    board.appendChild(tile);
+  }
+}
+
+function revealTile(tile, type){
+  tile.classList.add(type);
+  tile.disabled = true;
+  const icon = tile.querySelector('.tile-icon');
+  icon.textContent = type === 'safe' ? '★' : '✕';
+}
+
+function generateMines(count){
+  minePositions.clear();
+  while(minePositions.size < count){
+    minePositions.add(Math.floor(Math.random() * TOTAL_TILES));
+  }
+}
+
+function revealMines(triggerIndex = -1){
+  minePositions.forEach(index => {
+    const tile = board.children[index];
+    if(!tile.classList.contains('safe') && !tile.classList.contains('mine')){
+      revealTile(tile, 'mine');
+    }
+    if(index === triggerIndex){
+      tile.querySelector('.tile-icon').textContent = '✹';
+    }
+  });
+}
+
+function finishRound(){
+  gameActive = false;
+  betInput.disabled = false;
+  minesInput.disabled = false;
+  startBtn.disabled = false;
+  cashoutBtn.disabled = true;
+  renderCashout();
+}
+
+function startGame(){
+  if(gameActive) return;
+
+  betAmount = parseFloat(betInput.value);
+  const mineCount = getMineCount();
+
+  if(isNaN(betAmount) || betAmount <= 0){
+    setStatus('Digite uma aposta válida.', 'lose');
+    return;
+  }
+
+  if(betAmount > balance){
+    setStatus('Saldo insuficiente. Faça um depósito.', 'lose');
+    return;
+  }
+
+  balance -= betAmount;
+  updateBalance();
+
+  opened = 0;
+  gameActive = true;
+  generateMines(mineCount);
+  buildBoard();
+
+  betInput.disabled = true;
+  minesInput.disabled = true;
+  startBtn.disabled = true;
+  cashoutBtn.disabled = true;
+
+  renderCashout();
+  setStatus('Rodada iniciada. Escolha uma casa.', 'active');
+}
+
+function clickTile(index){
+  if(!gameActive) return;
+
+  const tile = board.children[index];
+  if(tile.classList.contains('safe') || tile.classList.contains('mine')) return;
+
+  if(minePositions.has(index)){
+    revealTile(tile, 'mine');
+    tile.querySelector('.tile-icon').textContent = '✹';
+    revealMines(index);
+    board.classList.add('boom');
+    setTimeout(() => board.classList.remove('boom'), 300);
+    setStatus('Você acertou uma mina.', 'lose');
+    finishRound();
+    return;
+  }
+
+  revealTile(tile, 'safe');
+  opened++;
+  cashoutBtn.disabled = false;
+  renderCashout();
+  setStatus(`Seguro. Multiplicador em ${calcMultiplier().toFixed(2)}x.`, 'active');
+
+  if(opened >= TOTAL_TILES - getMineCount()){
+    cashout(true);
+  }
+}
+
+function cashout(auto=false){
+  if(!gameActive) return;
+
+  if(opened === 0){
+    setStatus('Abra pelo menos uma casa antes de retirar.', 'lose');
+    return;
+  }
+
+  const mult = calcMultiplier();
+  const win = Number((betAmount * mult).toFixed(2));
+
+  balance += win;
+  updateBalance();
+  revealMines();
+  setStatus(auto ? 'Tabuleiro limpo. Vitória máxima!' : `Retirada concluída em ${mult.toFixed(2)}x.`, 'win');
+  finishRound();
+}
+
+startBtn.onclick = startGame;
+cashoutBtn.onclick = () => cashout(false);
+betInput.addEventListener('input', renderCashout);
+minesInput.addEventListener('input', renderCashout);
+
+buildBoard();
+updateBalance();
+renderCashout();
+
+window.addEventListener('storage', () => {
+  balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+  updateBalance();
+  renderCashout();
+});
+
+if(balance <= 0){
+  setStatus('Volte ao hub para depositar saldo.', 'active');
+}
+</script>
+</body>
+</html>

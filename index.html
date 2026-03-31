@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="icon.png">
 <title>Double</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
@@ -34,29 +35,58 @@ body{
   gap:18px;
 }
 
-.top-actions{
-  width:100%;
-  max-width:700px;
-  display:flex;
-  justify-content:flex-end;
-}
-
-.deposit-btn{
+.hub-back{
+  text-decoration:none;
   border:none;
   border-radius:10px;
   padding:10px 16px;
-  background:linear-gradient(135deg,#2ecc71,#27ae60);
   color:#fff;
   font-family:'Orbitron',sans-serif;
   font-size:12px;
   font-weight:700;
   letter-spacing:1px;
   cursor:pointer;
-  box-shadow:0 8px 20px rgba(46,204,113,.18);
+  transition:transform .15s ease, filter .15s ease;
+  background:linear-gradient(135deg,#5865f2,#4752c4);
+  box-shadow:0 8px 20px rgba(88,101,242,.18);
+}
+.hub-back:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+.hub-back:active{ transform:translateY(1px); }
+
+.top-actions{
+  width:100%;
+  max-width:700px;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.deposit-btn,
+.switch-game-btn{
+  border:none;
+  border-radius:10px;
+  padding:10px 16px;
+  color:#fff;
+  font-family:'Orbitron',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:1px;
+  cursor:pointer;
   transition:transform .15s ease, filter .15s ease;
 }
-.deposit-btn:hover{ filter:brightness(1.08); transform:translateY(-1px); }
-.deposit-btn:active{ transform:translateY(1px); }
+.deposit-btn{
+  background:linear-gradient(135deg,#2ecc71,#27ae60);
+  box-shadow:0 8px 20px rgba(46,204,113,.18);
+}
+.switch-game-btn{
+  background:linear-gradient(135deg,#5865f2,#4752c4);
+  box-shadow:0 8px 20px rgba(88,101,242,.18);
+}
+.deposit-btn:hover,
+.switch-game-btn:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+.deposit-btn:active,
+.switch-game-btn:active{ transform:translateY(1px); }
 
 .logo{
   font-family:'Orbitron',sans-serif;
@@ -66,6 +96,68 @@ body{
   color:#fff;
   text-transform:uppercase;
   opacity:.85;
+}
+
+.page-header{
+  width:100%;
+  max-width:700px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:16px;
+  background:#171a21;
+  border:1px solid rgba(255,255,255,.08);
+}
+.page-header-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.page-back{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:#232834;
+  color:#fff;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  flex-shrink:0;
+}
+.page-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:#2ecc71;
+  color:#111318;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  flex-shrink:0;
+}
+.page-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:18px;
+  letter-spacing:1px;
+}
+.page-sub{
+  font-size:11px;
+  color:rgba(255,255,255,.58);
+  margin-top:2px;
+}
+.page-live{
+  padding:6px 10px;
+  border-radius:999px;
+  background:#232834;
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
 }
 
 /* ══════════════════════════════════════
@@ -505,11 +597,17 @@ body{
   <div class="toast-amount" id="toastAmount"></div>
 </div>
 
-<div class="top-actions">
-  <button class="deposit-btn" onclick="openDeposit()">Depositar</button>
+<div class="page-header">
+  <div class="page-header-left">
+    <a class="page-back" href="hub.html" aria-label="Voltar ao início">←</a>
+    <div class="page-icon">🎯</div>
+    <div>
+      <div class="page-title">Double</div>
+      <div class="page-sub">plinio.bet</div>
+    </div>
+  </div>
+  <div class="page-live">AO VIVO</div>
 </div>
-
-<div class="logo">Double</div>
 
 <!-- BALANCE -->
 <div class="balance-bar">
@@ -607,7 +705,8 @@ const MULT   = {red:2, black:2, green:14};
 const CNAMES = {red:"Vermelho", black:"Preto", green:"Branco (0)"};
 
 /* ─── STATE ─── */
-let balance    = 0;
+const STORAGE_KEY = 'casinoBalance';
+let balance    = Number(localStorage.getItem(STORAGE_KEY) || 0);
 let betColor   = null;
 let isSpinning = false;
 let countdownTimer = null;
@@ -777,6 +876,7 @@ function fmtMoney(v){ return "R$ "+v.toLocaleString("pt-BR",{minimumFractionDigi
 
 function updateBalance(delta){
   balance += delta;
+  localStorage.setItem(STORAGE_KEY, String(balance));
   balVal.textContent = fmtMoney(balance);
   balVal.classList.remove("win","lose");
   if(delta>0){ balVal.classList.add("win"); setTimeout(()=>balVal.classList.remove("win"),1200); }
@@ -1099,10 +1199,15 @@ function addHist(n){
   const cx=clip.getBoundingClientRect().width/2;
   track.style.transform=`translateX(${cx-CARD_W()/2}px)`;
   updateBetDisplay();
-  setTimeout(()=>{ openDeposit(true); }, 250);
+  balVal.textContent = fmtMoney(balance);
   // Inicia o ciclo automático com um pequeno delay
   setTimeout(()=>{ startCountdown(); }, 800);
 })();
+
+window.addEventListener('storage', ()=>{
+  balance = Number(localStorage.getItem(STORAGE_KEY) || 0);
+  balVal.textContent = fmtMoney(balance);
+});
 </script>
 </body>
 </html>
