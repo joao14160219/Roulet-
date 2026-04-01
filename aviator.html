@@ -4,11 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <title>Aviator</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 
 :root{
+  --font-ui:'Manrope',sans-serif;
+  --font-display:'Sora',sans-serif;
   --bg:#111318;
   --panel:#1a1d24;
   --panel-2:#12151b;
@@ -20,11 +25,17 @@
 }
 
 body{
-  background:#0f1115;
+  background:
+    radial-gradient(circle at top,rgba(52,104,165,.22) 0%,rgba(52,104,165,0) 28%),
+    linear-gradient(180deg,#06111d 0%,#081523 46%,#040b14 100%);
   color:#fff;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   min-height:100vh;
   padding:14px;
+}
+
+h1,h2,h3,.brand,.game-brand strong{
+  font-family:var(--font-display);
 }
 
 .hub-back{
@@ -278,9 +289,14 @@ body{
   opacity:0;
   pointer-events:none;
 }
+.loss-popup.win{
+  background:linear-gradient(180deg,#11281a,#0d1b12);
+  border:1px solid rgba(80,200,120,.38);
+}
 .loss-popup.show{
   animation:lossPopupIn .28s ease forwards, lossPopupOut .35s ease 1.65s forwards;
 }
+.loss-popup.win .loss-title{ color:#8df0a5; }
 .loss-title{
   color:#ff8d8d;
   font-size:13px;
@@ -374,6 +390,26 @@ input{
   margin-top:2px;
 }
 
+.auto-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:10px;
+}
+
+.mini-btn{
+  border:none;
+  border-radius:8px;
+  padding:11px 12px;
+  background:#1a2029;
+  color:#fff;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.mini-btn:disabled{ opacity:.45; cursor:not-allowed; }
+
 .status-line{
   padding:0 14px 14px;
   color:var(--text-soft);
@@ -458,6 +494,10 @@ input{
         <div class="control-card">
           <div class="cc-label">Retirada atual</div>
           <div class="cash-preview" id="cashPreview">R$ 0,00</div>
+          <div class="auto-row">
+            <input id="autoCashoutInput" type="number" value="2.00" min="1.01" step="0.01">
+            <button class="mini-btn" id="autoCashoutBtn" type="button">Auto 2x</button>
+          </div>
           <button class="action-btn" id="cashBtn" disabled>Retirar</button>
         </div>
       </div>
@@ -477,6 +517,8 @@ let cashedOut = false;
 let multiplier = 1;
 let crashPoint = 0;
 let betAmount = 0;
+let queuedBet = 0;
+let autoCashoutTarget = 0;
 let roundStart = 0;
 let animId = null;
 let autoRoundTimer = null;
@@ -488,6 +530,8 @@ const balanceEl = document.getElementById('balance');
 const betInput = document.getElementById('bet');
 const betBtn = document.getElementById('betBtn');
 const cashBtn = document.getElementById('cashBtn');
+const autoCashoutInput = document.getElementById('autoCashoutInput');
+const autoCashoutBtn = document.getElementById('autoCashoutBtn');
 const multiplierEl = document.getElementById('multiplier');
 const roundText = document.getElementById('roundText');
 const cashPreview = document.getElementById('cashPreview');
@@ -546,6 +590,34 @@ function playCrashSound(){
   }catch(e){}
 }
 
+function playFlybySound(){
+  try{
+    ensureAudio();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc.type = 'sawtooth';
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(420, now);
+    filter.frequency.exponentialRampToValueAtTime(2200, now + 0.9);
+
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(760, now + 0.9);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.045, now + 0.18);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 1.08);
+  }catch(e){}
+}
+
 function playCashoutSound(){
   try{
     ensureAudio();
@@ -566,6 +638,11 @@ function playCashoutSound(){
 
 function parseMoney(value){
   return parseFloat(String(value).replace(/\s+/g,'').replace(/\./g,'').replace(',', '.'));
+}
+
+function getAutoCashoutValue(){
+  const raw = parseFloat(autoCashoutInput.value);
+  return Number.isFinite(raw) ? Number(raw.toFixed(2)) : 0;
 }
 
 function updateBalance(){
@@ -646,7 +723,18 @@ function updateGraph(value){
 function renderCashoutPreview(){
   const amount = playing && activeBet ? Number((betAmount * multiplier).toFixed(2)) : 0;
   cashPreview.textContent = fmtMoney(amount);
-  cashBtn.textContent = amount > 0 ? `Retirar ${fmtMoney(amount)}` : 'Retirar';
+  if(playing && !activeBet){
+    cashBtn.textContent = 'Assistindo';
+  } else {
+    cashBtn.textContent = amount > 0 ? `Retirar ${fmtMoney(amount)}` : 'Retirar';
+  }
+}
+
+function renderAutoCashoutState(){
+  const target = getAutoCashoutValue();
+  autoCashoutBtn.textContent = target > 1 ? `Auto ${target.toFixed(2)}x` : 'Auto';
+  autoCashoutInput.disabled = playing;
+  autoCashoutBtn.disabled = playing;
 }
 
 function showCrashFlash(){
@@ -656,6 +744,19 @@ function showCrashFlash(){
 }
 
 function showLossPopup(amount){
+  lossPopup.classList.remove('win');
+  lossPopup.querySelector('.loss-title').textContent = 'Você perdeu';
+  lossPopup.querySelector('.loss-sub').textContent = 'Aposta perdida no crash';
+  lossValue.textContent = fmtMoney(amount);
+  lossPopup.classList.remove('show');
+  void lossPopup.offsetWidth;
+  lossPopup.classList.add('show');
+}
+
+function showWinPopup(amount, mult){
+  lossPopup.classList.add('win');
+  lossPopup.querySelector('.loss-title').textContent = 'Você ganhou';
+  lossPopup.querySelector('.loss-sub').textContent = `Saída em ${mult.toFixed(2)}x`;
   lossValue.textContent = fmtMoney(amount);
   lossPopup.classList.remove('show');
   void lossPopup.offsetWidth;
@@ -692,6 +793,13 @@ function queueAutoRound(delay = 7000){
     clearInterval(countdownTicker);
     countdownTicker = null;
     if(playing) return;
+    roundText.textContent = 'Pronto para apostar';
+    betBtn.disabled = false;
+    cashBtn.disabled = true;
+    betInput.disabled = false;
+    setStatus('Clique em Apostar para entrar na próxima rodada.', 'active');
+    startRound();
+    return;
     const nextBet = parseFloat(betInput.value);
     if(!isNaN(nextBet) && nextBet > 0 && balance >= nextBet){
       startRound();
@@ -705,9 +813,11 @@ function endRound(){
   playing = false;
   activeBet = false;
   cashedOut = false;
+  autoCashoutTarget = 0;
   betBtn.disabled = false;
   cashBtn.disabled = true;
   betInput.disabled = false;
+  renderAutoCashoutState();
 }
 
 function animate(now){
@@ -715,11 +825,19 @@ function animate(now){
 
   const elapsed = now - roundStart;
   const seconds = elapsed / 1000;
-  multiplier = Number(Math.max(1, Math.exp(Math.pow(seconds, 1.22) / 9.8)).toFixed(2));
+  if(seconds <= 10){
+    multiplier = Number((1 + seconds / 10).toFixed(2));
+  } else {
+    multiplier = Number((2 * Math.exp((seconds - 10) / 7.5)).toFixed(2));
+  }
   multiplierEl.textContent = `${multiplier.toFixed(2)}x`;
   roundText.textContent = cashedOut ? 'Aguardando o crash' : 'Voando...';
   updateGraph(multiplier);
   renderCashoutPreview();
+
+  if(activeBet && !cashedOut && autoCashoutTarget > 1 && multiplier >= autoCashoutTarget){
+    cashout(true);
+  }
 
   if(multiplier >= crashPoint){
     doCrash();
@@ -729,41 +847,74 @@ function animate(now){
   animId = requestAnimationFrame(animate);
 }
 
+function queueBet(){
+  if(playing){
+    setStatus('Aguarde a próxima rodada para apostar.', 'active');
+    return;
+  }
+
+  const nextBet = parseFloat(betInput.value);
+  if(isNaN(nextBet) || nextBet <= 0){
+    setStatus('Digite uma aposta válida.', 'lose');
+    return;
+  }
+  if(nextBet > balance){
+    setStatus('Saldo insuficiente. Faça um depósito.', 'lose');
+    return;
+  }
+
+  queuedBet = nextBet;
+  betAmount = nextBet;
+  autoCashoutTarget = getAutoCashoutValue();
+  renderAutoCashoutState();
+  renderCashoutPreview();
+  setStatus(autoCashoutTarget > 1
+    ? `Entrada confirmada com ${fmtMoney(nextBet)} e saída automática em ${autoCashoutTarget.toFixed(2)}x.`
+    : `Entrada confirmada para a próxima rodada com ${fmtMoney(nextBet)}.`, 'win');
+}
+
 function startRound(){
   if(playing) return;
 
   clearTimeout(autoRoundTimer);
   clearInterval(countdownTicker);
-  betAmount = parseFloat(betInput.value);
-  if(isNaN(betAmount) || betAmount <= 0){
-    setStatus('Digite uma aposta válida.', 'lose');
-    return;
-  }
-  if(betAmount > balance){
-    setStatus('Saldo insuficiente. Faça um depósito.', 'lose');
-    return;
-  }
-
-  balance -= betAmount;
-  updateBalance();
+  betAmount = 0;
   playTakeoffSound();
 
   crashPoint = generateCrash();
   playing = true;
-  activeBet = true;
+  activeBet = false;
   cashedOut = false;
+  autoCashoutTarget = getAutoCashoutValue();
   roundStart = performance.now();
   gameArea.classList.remove('crashed');
 
-  betBtn.disabled = true;
-  cashBtn.disabled = false;
-  betInput.disabled = true;
+  if(queuedBet > 0){
+    if(queuedBet <= balance){
+      betAmount = queuedBet;
+      balance -= betAmount;
+      updateBalance();
+      activeBet = true;
+    } else {
+      setStatus('Saldo insuficiente para entrar nesta rodada.', 'lose');
+    }
+  }
+  queuedBet = 0;
 
-  setStatus('Rodada iniciada. Boa sorte!', 'active');
+  betBtn.disabled = true;
+  cashBtn.disabled = !activeBet;
+  betInput.disabled = true;
+  renderAutoCashoutState();
+
+  if(activeBet){
+    setStatus(autoCashoutTarget > 1 ? `Aposta confirmada. Auto saída em ${autoCashoutTarget.toFixed(2)}x.` : 'Aposta confirmada. Boa sorte!', 'active');
+  } else {
+    setStatus('Rodada em andamento. Você pode analisar sem apostar.', 'active');
+  }
   animId = requestAnimationFrame(animate);
 }
 
-function cashout(){
+function cashout(auto = false){
   if(!playing || !activeBet || cashedOut) return;
 
   const win = Number((betAmount * multiplier).toFixed(2));
@@ -775,7 +926,8 @@ function cashout(){
   activeBet = false;
   cashBtn.disabled = true;
   renderCashoutPreview();
-  setStatus(`Retirado em ${multiplier.toFixed(2)}x.`, 'win');
+  showWinPopup(win, multiplier);
+  setStatus(auto ? `Saída automática em ${multiplier.toFixed(2)}x.` : `Retirado em ${multiplier.toFixed(2)}x.`, 'win');
 }
 
 function doCrash(){
@@ -785,6 +937,7 @@ function doCrash(){
 
   showCrashFlash();
   playCrashSound();
+  setTimeout(playFlybySound, 120);
 
   multiplierEl.textContent = `${crashPoint.toFixed(2)}x`;
   multiplierEl.classList.add('crash');
@@ -810,14 +963,26 @@ function doCrash(){
   }, 1500);
 }
 
-betBtn.onclick = startRound;
+betBtn.onclick = queueBet;
 cashBtn.onclick = cashout;
+autoCashoutBtn.onclick = () => {
+  const target = getAutoCashoutValue();
+  if(target <= 1){
+    setStatus('Defina uma saída automática acima de 1.00x.', 'lose');
+    return;
+  }
+  autoCashoutTarget = target;
+  renderAutoCashoutState();
+  setStatus(`Saída automática ajustada para ${target.toFixed(2)}x.`, 'active');
+};
+autoCashoutInput.addEventListener('input', renderAutoCashoutState);
 window.addEventListener('pointerdown', ensureAudio);
 window.addEventListener('resize', () => updateGraph(Math.max(multiplier, 1)));
 
 updateBalance();
 renderHistory();
 resetVisual();
+renderAutoCashoutState();
 queueAutoRound(7000);
 
 window.addEventListener('storage', () => {

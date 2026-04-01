@@ -4,11 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <title>Mines</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 
 :root{
+  --font-ui:'Manrope',sans-serif;
+  --font-display:'Sora',sans-serif;
   --blue-1:#0b5ed7;
   --blue-2:#0a3d91;
   --blue-3:#072c66;
@@ -22,10 +27,16 @@
 
 body{
   min-height:100vh;
-  background:radial-gradient(circle at top,#1971ff 0%,#0a4bb8 18%,#0a3d91 48%,#062a63 100%);
-  font-family:Arial,sans-serif;
+  background:
+    radial-gradient(circle at top,rgba(52,104,165,.26) 0%,rgba(52,104,165,0) 28%),
+    linear-gradient(180deg,#06111d 0%,#081523 46%,#040b14 100%);
+  font-family:var(--font-ui);
   color:#fff;
   padding:14px;
+}
+
+h1,h2,h3,.brand,.game-brand strong{
+  font-family:var(--font-display);
 }
 
 .hub-back{
@@ -218,6 +229,21 @@ body{
   transform:translateY(-1px) scale(1.03);
   filter:brightness(1.06);
 }
+.tile.planned{
+  outline:2px solid rgba(255,255,255,.42);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.12), 0 0 0 2px rgba(7,21,48,.3);
+}
+.tile.planned::before{
+  opacity:1;
+  background:radial-gradient(circle at 35% 35%, rgba(255,255,255,.55), rgba(3,12,34,.22) 58%, transparent 60%);
+}
+.tile.planned .tile-icon{
+  opacity:1;
+  transform:scale(1) rotate(0deg);
+  font-size:18px;
+  font-weight:800;
+  color:#fff;
+}
 .tile:disabled{ cursor:default; }
 
 .tile-icon{
@@ -292,6 +318,38 @@ body{
 #cashout{ background:linear-gradient(180deg,#ff7436,var(--orange)); }
 #cashout:disabled{ opacity:.45; cursor:not-allowed; }
 
+.auto-controls{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:10px;
+  align-items:center;
+}
+
+.auto-note{
+  font-size:12px;
+  color:rgba(255,255,255,.76);
+  text-align:left;
+}
+
+#autoModeBtn,
+#cancelAutoBtn{
+  border:none;
+  border-radius:999px;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  min-width:132px;
+  padding:11px 16px;
+  font-size:13px;
+  letter-spacing:.3px;
+}
+
+#autoModeBtn{ background:linear-gradient(180deg,#586dff,#374fd9); }
+#autoModeBtn.active{ background:linear-gradient(180deg,#6c7dff,#4a5ffd); }
+#cancelAutoBtn{ background:linear-gradient(180deg,#ff5d73,#d83a50); }
+#cancelAutoBtn:disabled{ opacity:.45; cursor:not-allowed; }
+
 .status{
   margin-top:10px;
   text-align:center;
@@ -302,6 +360,47 @@ body{
 .status.active{ color:#ffe18c; }
 .status.win{ color:#adffc6; }
 .status.lose{ color:#ffb5b5; }
+
+.win-popup{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(.9);
+  width:min(340px,88vw);
+  border-radius:16px;
+  border:1px solid rgba(102,255,153,.7);
+  background:
+    radial-gradient(circle at top, rgba(110,255,170,.18), transparent 45%),
+    linear-gradient(180deg,#174724 0%,#0d2916 100%);
+  box-shadow:0 18px 44px rgba(0,0,0,.38), 0 0 30px rgba(102,255,153,.22);
+  padding:18px;
+  text-align:center;
+  opacity:0;
+  pointer-events:none;
+  z-index:30;
+}
+.win-popup.show{
+  opacity:1;
+  pointer-events:none;
+  transform:translate(-50%,-50%) scale(1);
+  transition:all .2s ease;
+}
+.win-popup h3{
+  color:#78ff9f;
+  font-size:24px;
+  margin-bottom:8px;
+  text-shadow:0 0 18px rgba(120,255,159,.22);
+}
+.win-popup .value{
+  font-size:32px;
+  font-weight:800;
+  margin-bottom:6px;
+  color:#f3fff7;
+}
+.win-popup .sub{
+  color:rgba(235,255,241,.84);
+  font-size:13px;
+}
 
 @keyframes safeReveal{
   0%{transform:scale(.86)}
@@ -326,6 +425,9 @@ body{
   .controls{
     grid-template-columns:1fr;
   }
+  .auto-controls{
+    grid-template-columns:1fr;
+  }
   #start,
   #cashout,
   .bet-box{
@@ -343,6 +445,11 @@ body{
 </style>
 </head>
 <body>
+<div class="win-popup" id="winPopup">
+  <h3>Você ganhou</h3>
+  <div class="value" id="winPopupValue">R$ 0,00</div>
+  <div class="sub" id="winPopupSub">Retirada concluída.</div>
+</div>
 <div class="app">
   <div class="topbar">
     <div class="game-header-left">
@@ -378,6 +485,12 @@ body{
       <button id="cashout" disabled>Retirar</button>
     </div>
 
+    <div class="auto-controls">
+      <div class="auto-note" id="autoNote">Modo manual ativo.</div>
+      <button id="autoModeBtn" type="button">Modo Automático</button>
+      <button id="cancelAutoBtn" type="button" disabled>Cancelar Auto</button>
+    </div>
+
     <div class="status" id="status">Escolha a aposta e abra uma rodada.</div>
   </div>
 </div>
@@ -392,6 +505,12 @@ let minePositions = new Set();
 let gameActive = false;
 let opened = 0;
 let betAmount = 0;
+let autoMode = false;
+let autoSequence = [];
+let autoPointer = 0;
+let autoRunning = false;
+let autoTimer = null;
+let autoRestartPending = false;
 
 const board = document.getElementById('board');
 const balanceEl = document.getElementById('balance');
@@ -401,6 +520,12 @@ const multEl = document.getElementById('mult');
 const cashoutBtn = document.getElementById('cashout');
 const statusEl = document.getElementById('status');
 const startBtn = document.getElementById('start');
+const autoModeBtn = document.getElementById('autoModeBtn');
+const cancelAutoBtn = document.getElementById('cancelAutoBtn');
+const autoNote = document.getElementById('autoNote');
+const winPopup = document.getElementById('winPopup');
+const winPopupValue = document.getElementById('winPopupValue');
+const winPopupSub = document.getElementById('winPopupSub');
 
 function fmtMoney(v){
   return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -422,6 +547,31 @@ function updateBalance(){
 function setStatus(message, tone=''){
   statusEl.className = 'status' + (tone ? ' ' + tone : '');
   statusEl.textContent = message;
+}
+
+function showWinPopup(amount, mult){
+  winPopupValue.textContent = fmtMoney(amount);
+  winPopupSub.textContent = `Retirada em ${mult.toFixed(2)}x`;
+  winPopup.classList.remove('show');
+  void winPopup.offsetWidth;
+  winPopup.classList.add('show');
+  setTimeout(() => winPopup.classList.remove('show'), 1800);
+}
+
+function renderAutoControls(){
+  autoModeBtn.classList.toggle('active', autoMode);
+  autoModeBtn.textContent = autoMode ? 'Auto Ligado' : 'Modo Automático';
+  cancelAutoBtn.disabled = !autoRunning;
+
+  if(autoMode){
+    if(autoSequence.length > 0){
+      autoNote.textContent = `Sequência automática: ${autoSequence.length} casa(s) marcada(s).`;
+    } else {
+      autoNote.textContent = 'Clique nas casas para montar a sequência automática.';
+    }
+  } else {
+    autoNote.textContent = 'Modo manual ativo.';
+  }
 }
 
 function getMineCount(){
@@ -477,6 +627,76 @@ function buildBoard(){
     tile.onclick = () => clickTile(i);
     board.appendChild(tile);
   }
+
+  renderAutoSelection();
+}
+
+function renderAutoSelection(){
+  Array.from(board.children).forEach((tile, index) => {
+    tile.classList.remove('planned');
+    const icon = tile.querySelector('.tile-icon');
+    if(!icon) return;
+
+    if(!gameActive && autoMode){
+      const order = autoSequence.indexOf(index);
+      if(order >= 0){
+        tile.classList.add('planned');
+        icon.textContent = String(order + 1);
+      } else if(!tile.classList.contains('safe') && !tile.classList.contains('mine')){
+        icon.textContent = '';
+      }
+    } else if(!tile.classList.contains('safe') && !tile.classList.contains('mine')){
+      icon.textContent = '';
+    }
+  });
+}
+
+function toggleAutoTile(index){
+  if(gameActive || !autoMode) return;
+
+  const existingIndex = autoSequence.indexOf(index);
+  if(existingIndex >= 0){
+    autoSequence.splice(existingIndex, 1);
+  } else {
+    autoSequence.push(index);
+  }
+
+  renderAutoSelection();
+  renderAutoControls();
+}
+
+function cancelAutoRun(showStatus = true){
+  clearTimeout(autoTimer);
+  autoTimer = null;
+  autoRunning = false;
+  autoRestartPending = false;
+  renderAutoControls();
+  if(showStatus && gameActive){
+    setStatus('Modo automático cancelado. Você pode seguir manualmente.', 'active');
+  }
+}
+
+function runAutoSequence(){
+  if(!autoRunning || !gameActive) return;
+
+  while(autoPointer < autoSequence.length){
+    const index = autoSequence[autoPointer++];
+    const tile = board.children[index];
+    if(tile && !tile.classList.contains('safe') && !tile.classList.contains('mine')){
+      clickTile(index);
+      if(autoRunning && gameActive){
+        autoTimer = setTimeout(runAutoSequence, 650);
+      }
+      return;
+    }
+  }
+
+  autoRunning = false;
+  renderAutoControls();
+  if(gameActive){
+    autoRestartPending = true;
+    cashout(false, true);
+  }
 }
 
 function revealTile(tile, type){
@@ -506,16 +726,24 @@ function revealMines(triggerIndex = -1){
 }
 
 function finishRound(){
+  cancelAutoRun(false);
   gameActive = false;
   betInput.disabled = false;
   minesInput.disabled = false;
   startBtn.disabled = false;
   cashoutBtn.disabled = true;
   renderCashout();
+  renderAutoSelection();
+  renderAutoControls();
 }
 
 function startGame(){
   if(gameActive) return;
+
+  if(autoMode && autoSequence.length === 0){
+    setStatus('Selecione ao menos uma casa para usar o modo automático.', 'lose');
+    return;
+  }
 
   betAmount = parseFloat(betInput.value);
   const mineCount = getMineCount();
@@ -544,11 +772,22 @@ function startGame(){
   cashoutBtn.disabled = true;
 
   renderCashout();
-  setStatus('Rodada iniciada. Escolha uma casa.', 'active');
+  if(autoMode){
+    autoPointer = 0;
+    autoRunning = true;
+    renderAutoControls();
+    setStatus('Rodada iniciada. Sequência automática em andamento.', 'active');
+    autoTimer = setTimeout(runAutoSequence, 500);
+  } else {
+    setStatus('Rodada iniciada. Escolha uma casa.', 'active');
+  }
 }
 
 function clickTile(index){
-  if(!gameActive) return;
+  if(!gameActive){
+    toggleAutoTile(index);
+    return;
+  }
 
   const tile = board.children[index];
   if(tile.classList.contains('safe') || tile.classList.contains('mine')) return;
@@ -575,7 +814,7 @@ function clickTile(index){
   }
 }
 
-function cashout(auto=false){
+function cashout(auto=false, restartAuto=false){
   if(!gameActive) return;
 
   if(opened === 0){
@@ -586,21 +825,48 @@ function cashout(auto=false){
   const mult = calcMultiplier();
   const win = Number((betAmount * mult).toFixed(2));
 
+  cancelAutoRun(false);
   balance += win;
   updateBalance();
   revealMines();
-  setStatus(auto ? 'Tabuleiro limpo. Vitória máxima!' : `Retirada concluída em ${mult.toFixed(2)}x.`, 'win');
+  showWinPopup(win, mult);
+  if(auto){
+    setStatus('Tabuleiro limpo. Vitória máxima!', 'win');
+  } else if(restartAuto){
+    setStatus(`Sequência concluída. Retirada automática em ${mult.toFixed(2)}x.`, 'win');
+  } else {
+    setStatus(`Retirada concluída em ${mult.toFixed(2)}x.`, 'win');
+  }
   finishRound();
+  if(restartAuto && autoMode && autoSequence.length > 0){
+    autoRestartPending = false;
+    setTimeout(() => {
+      if(!gameActive){
+        startGame();
+      }
+    }, 900);
+  }
 }
 
 startBtn.onclick = startGame;
 cashoutBtn.onclick = () => cashout(false);
+autoModeBtn.onclick = () => {
+  if(gameActive) return;
+  autoMode = !autoMode;
+  if(!autoMode){
+    autoSequence = [];
+    renderAutoSelection();
+  }
+  renderAutoControls();
+};
+cancelAutoBtn.onclick = () => cancelAutoRun(true);
 betInput.addEventListener('input', renderCashout);
 minesInput.addEventListener('input', renderCashout);
 
 buildBoard();
 updateBalance();
 renderCashout();
+renderAutoControls();
 
 window.addEventListener('storage', () => {
   balance = Number(localStorage.getItem(STORAGE_KEY) || 0);

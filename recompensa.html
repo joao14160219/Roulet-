@@ -4,11 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <title>Recompensas</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 
 :root{
+  --font-ui:'Manrope',sans-serif;
+  --font-display:'Sora',sans-serif;
   --bg:#081425;
   --line:rgba(255,255,255,.14);
   --text-soft:rgba(255,255,255,.72);
@@ -18,12 +23,18 @@
 
 body{
   min-height:100vh;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   color:#fff;
-  background:radial-gradient(circle at top,#12324f 0%,#081425 58%,#040b14 100%);
+  background:
+    radial-gradient(circle at top,rgba(52,104,165,.34) 0%,rgba(52,104,165,0) 34%),
+    linear-gradient(180deg,#06111d 0%,#081523 46%,#040b14 100%);
   display:flex;
   justify-content:center;
   padding:14px 10px;
+}
+
+h1,h2,h3{
+  font-family:var(--font-display);
 }
 
 .app{
@@ -71,7 +82,9 @@ body{
   min-height:calc(100vh - 120px);
   border-radius:18px;
   border:1px solid var(--line);
-  background:linear-gradient(180deg,#10253b 0%,#0a1c2c 100%);
+  background:
+    radial-gradient(circle at top right, rgba(255,213,107,.08), transparent 28%),
+    linear-gradient(180deg,#10253b 0%,#0a1c2c 100%);
   display:flex;
   flex-direction:column;
   align-items:center;

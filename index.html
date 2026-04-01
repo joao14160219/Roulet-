@@ -4,11 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <title>Double</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 :root{
+  --font-ui:'Manrope',sans-serif;
+  --font-display:'Sora',sans-serif;
   --bg:#071325;
   --surface:#122436;
   --surface2:#0c1b2b;
@@ -23,7 +28,7 @@
 
 body{
   background:var(--bg);
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   color:#fff;
   min-height:100vh;
   display:flex;
@@ -32,7 +37,9 @@ body{
   justify-content:flex-start;
   padding:0 10px 120px;
   gap:14px;
-  background:radial-gradient(circle at top,#112945 0%,#071325 48%,#050f1d 100%);
+  background:
+    radial-gradient(circle at top,rgba(52,104,165,.34) 0%,rgba(52,104,165,0) 34%),
+    linear-gradient(180deg,#06111d 0%,#081523 46%,#040b14 100%);
 }
 
 .hub-back{
@@ -41,7 +48,7 @@ body{
   border-radius:10px;
   padding:10px 16px;
   color:#fff;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:12px;
   font-weight:700;
   letter-spacing:1px;
@@ -68,7 +75,7 @@ body{
   border-radius:10px;
   padding:10px 16px;
   color:#fff;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:12px;
   font-weight:700;
   letter-spacing:1px;
@@ -89,7 +96,7 @@ body{
 .switch-game-btn:active{ transform:translateY(1px); }
 
 .logo{
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:clamp(16px,4vw,26px);
   font-weight:900;
   letter-spacing:6px;
@@ -139,7 +146,7 @@ body{
   flex-shrink:0;
 }
 .page-title{
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:18px;
   letter-spacing:1px;
 }
@@ -230,7 +237,7 @@ body{
   text-transform:uppercase;
 }
 .bal-value{
-  font-family:Arial,sans-serif;
+  font-family:var(--font-display);
   font-size:22px;
   font-weight:900;
   color:#fff;
@@ -264,7 +271,7 @@ body{
   text-transform:uppercase;
 }
 .countdown-num{
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:20px;
   font-weight:900;
   color:#fff;
@@ -367,7 +374,7 @@ body{
   width:var(--card-size); height:var(--card-size);
   border-radius:12px;
   display:flex; align-items:center; justify-content:center;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:18px; font-weight:700;
   position:relative; user-select:none;
   border:2px solid transparent;
@@ -418,7 +425,7 @@ body{
 .chip{
   padding:7px 14px;
   border-radius:8px;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:12px; font-weight:700;
   background:#1a2d42;
   border:1px solid rgba(255,255,255,.1);
@@ -439,7 +446,7 @@ body{
   color:rgba(255,255,255,.35);
   cursor:pointer;
   transition:all .15s;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   letter-spacing:1px;
 }
 .chip-clear:hover{ border-color:rgba(255,255,255,.3); color:#fff; }
@@ -466,7 +473,7 @@ body{
   border:1px solid rgba(255,255,255,.1);
   border-radius:8px;
   padding:10px 14px;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:16px; font-weight:700;
   color:#fff;
   outline:none;
@@ -486,7 +493,7 @@ body{
   padding:14px 10px;
   border-radius:10px;
   border:2px solid transparent;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:13px; font-weight:700; letter-spacing:1px;
   cursor:pointer;
   transition:all .15s;
@@ -564,7 +571,7 @@ body{
   padding:2px 7px; border-radius:99px;
   white-space:nowrap;
   opacity:0; transition:opacity .2s;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   letter-spacing:1px;
 }
 .bet-btn.selected .pending-label{ opacity:1; }
@@ -595,7 +602,7 @@ body{
 
 .toast-emoji{ display:none; }
 .toast-title{
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:22px; font-weight:900; letter-spacing:2px;
 }
 .toast.win-toast  .toast-title{ color:#22c55e; }
@@ -605,7 +612,7 @@ body{
   margin-top:4px; letter-spacing:1px;
 }
 .toast-amount{
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:28px; font-weight:900;
   margin-top:8px;
 }
@@ -636,7 +643,7 @@ body{
 }
 .result-label{ font-size:10px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px; }
 .result-number{
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
   font-size:clamp(32px,9vw,66px); font-weight:900; line-height:1;
 }
 .result-number.idle{ color:rgba(255,255,255,.1); }
@@ -664,13 +671,13 @@ body{
    HISTORY
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .section-wrap{ width:100%; max-width:760px; }
-.section-label{ font-family:Arial,sans-serif; font-size:9px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; }
+.section-label{ font-family:var(--font-ui); font-size:9px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px; }
 .hist-strip{ overflow:hidden; }
 .hist-track{ display:flex; gap:7px; }
 .hc{
   flex-shrink:0; width:42px; height:50px; border-radius:8px;
   display:flex; align-items:center; justify-content:center;
-  font-family:Arial,sans-serif; font-size:13px; font-weight:700;
+  font-family:var(--font-ui); font-size:13px; font-weight:700;
   border:1px solid transparent;
 }
 .hc.red  { background:var(--red);   border-color:rgba(255,255,255,.07); }

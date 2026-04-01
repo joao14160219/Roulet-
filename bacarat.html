@@ -4,11 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <title>Bacarat • plinio.bet</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 
 :root{
+  --font-ui:'Manrope',sans-serif;
+  --font-display:'Sora',sans-serif;
   --bg:#07111b;
   --panel:#122232;
   --panel-2:#0e1b28;
@@ -22,9 +27,15 @@
 
 body{
   min-height:100vh;
-  background:linear-gradient(180deg,#06111b 0%,#0b1824 100%);
+  background:
+    radial-gradient(circle at top,rgba(52,104,165,.22) 0%,rgba(52,104,165,0) 30%),
+    linear-gradient(180deg,#06111d 0%,#081523 46%,#040b14 100%);
   color:#fff;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
+}
+
+h1,h2,h3,.header-title{
+  font-family:var(--font-display);
 }
 
 .page-topbar{

@@ -4,11 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <title>Originais - plinio.bet</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 
 :root{
+  --font-ui:'Manrope',sans-serif;
+  --font-display:'Sora',sans-serif;
   --bg:#071321;
   --line:rgba(255,255,255,.08);
   --card:#102133;
@@ -18,17 +23,26 @@
 
 body{
   min-height:100vh;
-  background:radial-gradient(circle at top,#12283d 0%,#081423 50%,#050f1b 100%);
+  background:
+    radial-gradient(circle at top,rgba(52,104,165,.34) 0%,rgba(52,104,165,0) 34%),
+    linear-gradient(180deg,#06111d 0%,#081523 46%,#040b14 100%);
   color:#fff;
-  font-family:Arial,sans-serif;
+  font-family:var(--font-ui);
+}
+
+h1,h2,h3,.game-card-body strong,.drawer h3{
+  font-family:var(--font-display);
 }
 
 .app{
   width:min(1220px,100%);
   min-height:100vh;
   margin:0 auto;
-  background:linear-gradient(180deg,#071321 0%,#0a1725 100%);
+  background:
+    radial-gradient(circle at top right, rgba(255,45,95,.08), transparent 24%),
+    linear-gradient(180deg,rgba(7,19,33,.96) 0%,rgba(10,23,37,.98) 100%);
   position:relative;
+  box-shadow:0 24px 60px rgba(0,0,0,.28);
 }
 
 .topbar{
@@ -302,6 +316,7 @@ body{
     <a class="drawer-link" href="aviator.html">Aviator</a>
     <a class="drawer-link" href="dragon.html">Dragon Tower</a>
     <a class="drawer-link" href="dice.html">Dice</a>
+    <a class="drawer-link" href="duckfight.html">Duck Fight</a>
     <a class="drawer-link" href="bacarat.html">Bacarat</a>
     <a class="drawer-link" href="penalty.html">Penalty</a>
   </nav>
@@ -331,32 +346,37 @@ body{
     <section class="games-grid">
       <a class="game-card" href="index.html">
         <img src="double.jfif" alt="Double">
-        <div class="game-card-body"><strong>Double</strong><span>Plinio.bet Originals</span></div>
+        <div class="game-card-body"><strong>Double</strong><span>Blaze Originals</span></div>
       </a>
 
-      <a class="game-card" href="dice.html">
-        <img src="tower.jfif" alt="Dice">
-        <div class="game-card-body"><strong>Dice</strong><span>Plinio.bet Originals</span></div>
+      <a class="game-card dice-card" href="dice.html">
+        <img src="dice.jpg" alt="Dice">
+        <div class="game-card-body"><strong>Dice</strong><span>Blaze Originals</span></div>
       </a>
 
       <a class="game-card" href="mines.html">
         <img src="mines.jfif" alt="Mines">
-        <div class="game-card-body"><strong>Mines</strong><span>Plinio.bet Originals</span></div>
+        <div class="game-card-body"><strong>Mines</strong><span>Blaze Originals</span></div>
       </a>
 
       <a class="game-card" href="aviator.html">
         <img src="aviator.jfif" alt="Aviator">
-        <div class="game-card-body"><strong>Aviator</strong><span>Plinio.bet Originals</span></div>
+        <div class="game-card-body"><strong>Aviator</strong><span>Blaze Originals</span></div>
       </a>
 
       <a class="game-card" href="penalty.html">
         <img src="penalty.jfif" alt="Penalty">
-        <div class="game-card-body"><strong>Penalty</strong><span>Plinio.bet Originals</span></div>
+        <div class="game-card-body"><strong>Penalty</strong><span>Blaze Originals</span></div>
       </a>
 
       <a class="game-card" href="dragon.html">
         <img src="tower.jfif" alt="Dragon Tower">
-        <div class="game-card-body"><strong>Dragon Tower</strong><span>Plinio.bet Originals</span></div>
+        <div class="game-card-body"><strong>Dragon Tower</strong><span>Blaze Originals</span></div>
+      </a>
+
+      <a class="game-card" href="duckfight.html">
+        <img src="brigagalo.jpg" alt="Duck Fight">
+        <div class="game-card-body"><strong>Duck Fight</strong><span>Blaze Originals</span></div>
       </a>
     </section>
   </main>

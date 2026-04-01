@@ -5,12 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="icon.png">
 <title>Penalty Shoot-Out</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --font-ui:'Manrope',sans-serif;
+  --font-display:'Sora',sans-serif;
+}
 body {
-  font-family: 'Nunito', sans-serif;
-  background: #1a0a2e;
+  font-family: var(--font-ui);
+  background:
+    radial-gradient(circle at top,rgba(52,104,165,.28) 0%,rgba(52,104,165,0) 28%),
+    linear-gradient(180deg,#06111d 0%,#081523 46%,#040b14 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -19,7 +27,9 @@ body {
 }
 .sky {
   position: fixed; inset: 0;
-  background: linear-gradient(180deg, #5ab5e8 0%, #87ceeb 30%, #b8e8b8 65%, #5aaa2e 100%);
+  background:
+    radial-gradient(circle at top, rgba(255,255,255,0.2), transparent 26%),
+    linear-gradient(180deg, #173a67 0%, #1f5b8f 24%, #194f61 58%, #143a2d 100%);
   z-index: 0;
 }
 .wrapper {
@@ -71,7 +81,7 @@ header {
 }
 .logo-text strong {
   display: block;
-  font-family: 'Fredoka One', cursive;
+  font-family: var(--font-display);
   font-size: 20px;
   color: #fff;
   letter-spacing: .4px;
@@ -141,7 +151,7 @@ header {
 .node-ball.done { background: linear-gradient(135deg,#4caf50,#81c784); border-color:#fff; box-shadow:0 0 12px rgba(76,175,80,0.8); }
 .node-ball.current { background: linear-gradient(135deg,#FFE033,#FFA500); border-color:#fff; box-shadow:0 0 18px rgba(255,224,51,0.9); animation: npulse 1s ease-in-out infinite; }
 @keyframes npulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
-.node-label { font-family:'Fredoka One',cursive; font-size:12px; color:rgba(255,255,255,0.6); }
+.node-label { font-family:var(--font-display); font-size:12px; color:rgba(255,255,255,0.6); }
 .node-label.done { color:#81c784; }
 .node-label.current { color:#FFE033; }
 
@@ -264,7 +274,7 @@ header {
 .result-flash.gfl { background: radial-gradient(ellipse, rgba(0,255,80,0.35) 0%, transparent 70%); }
 .result-flash.mfl { background: radial-gradient(ellipse, rgba(255,40,40,0.35) 0%, transparent 70%); }
 .result-text {
-  font-family: 'Fredoka One', cursive;
+  font-family: var(--font-display);
   font-size: clamp(38px, 9vw, 76px);
   letter-spacing: 3px;
   text-shadow: 0 4px 20px rgba(0,0,0,0.8);
@@ -298,7 +308,7 @@ header {
 .bet-input {
   background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.18);
   border-radius: 10px; color: #FFE033;
-  font-family: 'Fredoka One', cursive; font-size: 22px;
+  font-family: var(--font-display); font-size: 22px;
   padding: 6px 14px; width: 130px; outline: none; transition: border-color 0.2s;
 }
 .bet-input:focus { border-color: #FFE033; }
@@ -309,14 +319,24 @@ header {
 }
 .chip-btn:hover { background: rgba(255,255,255,0.22); }
 .mult-info {
-  text-align: center; font-family:'Fredoka One',cursive;
+  text-align: center; font-family:var(--font-display);
   font-size: 13px; color: rgba(255,255,255,0.55);
 }
 .mult-info span { color: #FFE033; font-size: 17px; }
+.place-bet-btn {
+  background: linear-gradient(135deg, #4caf50, #81c784);
+  border: none; border-radius: 12px; color: white;
+  font-family: var(--font-display); font-size: 17px;
+  padding: 12px 24px; cursor: pointer; width: 100%;
+  box-shadow: 0 4px 16px rgba(76,175,80,0.45);
+  transition: all 0.2s;
+}
+.place-bet-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(76,175,80,0.6); }
+.place-bet-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
 .cashout-btn {
   background: linear-gradient(135deg, #FFE033, #FFA500);
   border: none; border-radius: 12px; color: #1a0a00;
-  font-family: 'Fredoka One', cursive; font-size: 17px;
+  font-family: var(--font-display); font-size: 17px;
   padding: 12px 24px; cursor: pointer; width: 100%;
   box-shadow: 0 4px 16px rgba(255,165,0,0.5);
   transition: all 0.2s; display: none;
@@ -343,7 +363,7 @@ header {
 .h-res { font-weight:800; }
 .h-res.ok { color:#7fff00; }
 .h-res.ko { color:#ff4444; }
-.h-amt { font-family:'Fredoka One',cursive; font-size:14px; }
+.h-amt { font-family:var(--font-display); font-size:14px; }
 .h-amt.pos { color:#FFE033; }
 .h-amt.neg { color:#ff6666; }
 
@@ -363,11 +383,11 @@ header {
   padding:28px 36px; max-width:400px; text-align:center;
   box-shadow:0 0 60px rgba(76,175,80,0.3);
 }
-.intro-box h2 { font-family:'Fredoka One',cursive; font-size:26px; color:#FFE033; margin-bottom:10px; }
+.intro-box h2 { font-family:var(--font-display); font-size:26px; color:#FFE033; margin-bottom:10px; }
 .intro-box p { color:rgba(255,255,255,0.8); font-size:13px; line-height:1.65; margin-bottom:18px; }
 .play-btn {
   background:linear-gradient(135deg,#4caf50,#81c784); border:none; border-radius:50px;
-  color:white; font-family:'Fredoka One',cursive; font-size:20px;
+  color:white; font-family:var(--font-display); font-size:20px;
   padding:14px 40px; cursor:pointer; box-shadow:0 6px 20px rgba(76,175,80,0.6);
   transition:transform 0.15s;
 }
@@ -384,7 +404,7 @@ header {
   <div class="intro-box">
     <h2>⚽ PENALTY SHOOT-OUT</h2>
     <p>
-      Clique diretamente nas zonas dentro do gol para chutar!<br><br>
+      Escolha o valor, clique em apostar e depois chute no gol!<br><br>
       Acerte seguido para escalar os multiplicadores:<br>
       <strong style="color:#FFE033">×2 → ×4 → ×8 → ×16 → ×32</strong><br><br>
       Erre uma vez → perde tudo.<br>
@@ -496,7 +516,7 @@ header {
     </div>
   </div>
 
-  <div class="status-msg" id="statusMsg">Clique em uma zona dentro do gol para chutar!</div>
+  <div class="status-msg" id="statusMsg">Defina a aposta e clique em Apostar para começar.</div>
 
   <!-- Bet Panel -->
   <div class="bet-panel">
@@ -510,6 +530,7 @@ header {
       <button class="chip-btn" onclick="betHalf()">½ saldo</button>
     </div>
     <div class="mult-info" id="multInfo">Fase 1 de 5 — Primeiro multiplicador: <span>×2</span></div>
+    <button class="place-bet-btn" id="placeBetBtn" onclick="startSeriesBet()">APOSTAR</button>
     <button class="cashout-btn" id="cashoutBtn" onclick="doCashout()">
       💰 SACAR — R$ <span id="cashoutAmt">0,00</span>
     </button>
@@ -613,6 +634,10 @@ function syncTrack() {
 // ============================================================
 async function shoot(zone) {
   if (locked) return;
+  if (!inSeries) {
+    setStatus('Confirme a aposta no botão Apostar antes de chutar.');
+    return;
+  }
 
   // Start series
   if (!inSeries) {
@@ -686,6 +711,29 @@ async function shoot(zone) {
 // ============================================================
 // CASHOUT
 // ============================================================
+function startSeriesBet() {
+  if (inSeries || locked) return;
+
+  const bet = parseFloat(document.getElementById('betInput').value) || 0;
+  if (bet <= 0) {
+    setStatus('❌ Digite uma aposta válida.');
+    return;
+  }
+  if (bet > balance) {
+    setStatus('❌ Saldo insuficiente para essa aposta.');
+    return;
+  }
+
+  balance -= bet;
+  seriesBet = bet;
+  round = 0;
+  inSeries = true;
+  syncTrack();
+  renderMultInfo();
+  renderBalance();
+  setStatus(`Aposta de R$${fmt(bet)} confirmada. Clique em uma zona para chutar.`);
+}
+
 function doCashout() {
   if (!inSeries || round===0) return;
   const win = seriesBet * MULTS[round-1];
@@ -712,6 +760,7 @@ function endSeries() {
   lockZones(false);
   document.getElementById('betInput').disabled = false;
   document.getElementById('cashoutBtn').classList.remove('show');
+  setStatus('Defina a aposta e clique em Apostar para começar.');
 }
 
 async function flyBall(zone) {
@@ -759,6 +808,7 @@ function lockZones(val) {
 function renderBalance() {
   localStorage.setItem(STORAGE_KEY, String(balance));
   document.getElementById('balDisp').textContent = fmt(balance);
+  const placeBetBtn = document.getElementById('placeBetBtn');
   const cashBtn = document.getElementById('cashoutBtn');
   if (inSeries && round > 0) {
     const win = seriesBet * MULTS[round-1];
@@ -768,6 +818,7 @@ function renderBalance() {
     cashBtn.classList.remove('show');
   }
   document.getElementById('betInput').disabled = inSeries;
+  if (placeBetBtn) placeBetBtn.disabled = inSeries;
 }
 
 function renderMultInfo() {
